@@ -1,0 +1,105 @@
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
+import { LoadingProvider } from "@/contexts/loading-context";
+import { AuthProvider } from "@/contexts/auth-context";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ErrorBoundary } from "@/components/error-boundary";
+import { cn } from "@/lib/utils";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://substream-tracker.vercel.app"),
+  title: {
+    default: "SubStream - Subscription Tracker",
+    template: "%s | SubStream",
+  },
+  description:
+    "Track and manage your subscriptions effortlessly with AI powered insights. 100% free, private, and secure. No signup required.",
+  keywords: [
+    "subscription tracker",
+    "manage subscriptions",
+    "recurring payments",
+    "budgeting tool",
+    "AI insights",
+    "privacy-first",
+    "free",
+  ],
+  authors: [{ name: "Muhammad Tanveer Abbas" }],
+  creator: "Muhammad Tanveer Abbas",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://substream-tracker.vercel.app",
+    title: "SubStream - Privacy-First Subscription Tracker",
+    description:
+      "Track subscriptions with AI powered insights. 100% free and private.",
+    siteName: "SubStream",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SubStream - Privacy-First Subscription Tracker",
+    description:
+      "Track subscriptions with AI powered insights. 100% free and private.",
+    creator: "@m_tanveerabbas",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
+};
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jetbrains-mono",
+});
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={cn("dark", inter.variable, jetbrainsMono.variable)}
+    >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#22c55e" />
+      </head>
+      <body className="font-body antialiased">
+        <ErrorBoundary>
+          <AuthProvider>
+            <LoadingProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </LoadingProvider>
+          </AuthProvider>
+        </ErrorBoundary>
+        <Toaster />
+      </body>
+    </html>
+  );
+}
