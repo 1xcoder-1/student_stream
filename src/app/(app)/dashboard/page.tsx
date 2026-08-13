@@ -407,6 +407,8 @@ function EditModal({
           auto_renew: form.autoRenew,
           currency: form.currency,
           status: form.status,
+          reminder_enabled: form.reminderEnabled,
+          reminder_days_before: form.reminderDaysBefore,
         })
         .eq("id", form.id);
       if (dbError) throw dbError;
@@ -707,6 +709,81 @@ function EditModal({
               }}
             >
               {form.autoRenew ? (
+                <ToggleRight size={28} />
+              ) : (
+                <ToggleLeft size={28} />
+              )}
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: t.surface2,
+              border: `1px solid ${t.border}`,
+              borderRadius: 8,
+              padding: "12px 14px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: t.text,
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Email Reminders
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: t.text3,
+                  fontFamily: "var(--font-mono)",
+                  marginTop: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span>Notify me</span>
+                <select
+                  value={form.reminderDaysBefore ?? 3}
+                  onChange={(e) => f("reminderDaysBefore")(parseInt(e.target.value))}
+                  disabled={!form.reminderEnabled}
+                  style={{
+                    background: t.surface,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: 4,
+                    color: form.reminderEnabled ? t.text : t.text3,
+                    fontSize: 10,
+                    padding: "2px 4px",
+                    outline: "none",
+                    fontFamily: "inherit",
+                    cursor: form.reminderEnabled ? "pointer" : "not-allowed"
+                  }}
+                >
+                  <option value={1}>1 day</option>
+                  <option value={3}>3 days</option>
+                  <option value={7}>7 days</option>
+                  <option value={14}>14 days</option>
+                </select>
+                <span>before renewal</span>
+              </div>
+            </div>
+            <button
+              onClick={() => f("reminderEnabled")(!form.reminderEnabled)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: form.reminderEnabled ? t.blue : t.text3,
+              }}
+            >
+              {form.reminderEnabled ? (
                 <ToggleRight size={28} />
               ) : (
                 <ToggleLeft size={28} />
@@ -2296,6 +2373,7 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
       return;
     }
     setLoading(true);
+    setSummary("");
     setError(null);
     try {
       const payload = subs
@@ -2311,18 +2389,31 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subscriptions: payload }),
       });
+      
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to generate summary");
+        let errStr = "Failed to generate summary";
+        try { const d = await res.json(); errStr = d.error || errStr; } catch(e){}
+        throw new Error(errStr);
       }
-      const data = await res.json();
-      setSummary(data.summary);
+      
+      if (!res.body) throw new Error("No response body");
+      
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      
+      setLoading(false);
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        setSummary((prev) => (prev || "") + chunk);
+      }
     } catch (err: any) {
+      setLoading(false);
       setError(
         err.message || "AI service unavailable. Please try again later.",
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -2687,12 +2778,14 @@ function AddView({
     autoRenew: true,
     currency: "USD",
     notes: "",
+    reminderEnabled: false,
+    reminderDaysBefore: 3,
   };
   const [form, setForm] = useState(blank);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoad] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const f = (k: keyof typeof form) => (v: string | boolean) =>
+  const f = (k: keyof typeof form) => (v: string | boolean | number) =>
     setForm((p) => ({ ...p, [k]: v }));
 
   const aiAutofill = async () => {
@@ -2755,10 +2848,11 @@ function AddView({
         start_date: startDate,
         currency: form.currency,
         auto_renew: form.autoRenew,
-        status: "active",
         notes: form.notes || null,
         active_status: true,
         icon: "default",
+        reminder_enabled: form.reminderEnabled,
+        reminder_days_before: form.reminderDaysBefore,
       });
       if (dbError) throw dbError;
       setForm(blank);
@@ -2877,9 +2971,13 @@ function AddView({
                   ((e.target as HTMLInputElement).style.borderColor =
                     t.greenBorder)
                 }
-                onBlur={(e) =>
-                  ((e.target as HTMLInputElement).style.borderColor = t.border)
-                }
+                onBlur={(e) => {
+                  ((e.target as HTMLInputElement).style.borderColor = t.border);
+                  // Automatically trigger AI autofill if they typed a name but haven't filled amount yet
+                  if (form.name && !form.amount && !aiLoading) {
+                    aiAutofill();
+                  }
+                }}
               />
               <button
                 onClick={aiAutofill}
@@ -3093,6 +3191,81 @@ function AddView({
               }}
             >
               {form.autoRenew ? (
+                <ToggleRight size={27} />
+              ) : (
+                <ToggleLeft size={27} />
+              )}
+            </button>
+          </div>
+          
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: t.surface2,
+              border: `1px solid ${t.border}`,
+              borderRadius: 8,
+              padding: "13px 15px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: t.text,
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Email Reminders
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: t.text3,
+                  fontFamily: "var(--font-mono)",
+                  marginTop: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <span>Notify me</span>
+                <select
+                  value={form.reminderDaysBefore}
+                  onChange={(e) => f("reminderDaysBefore")(parseInt(e.target.value))}
+                  disabled={!form.reminderEnabled}
+                  style={{
+                    background: t.surface,
+                    border: `1px solid ${t.border}`,
+                    borderRadius: 4,
+                    color: form.reminderEnabled ? t.text : t.text3,
+                    fontSize: 10,
+                    padding: "2px 4px",
+                    outline: "none",
+                    fontFamily: "inherit",
+                    cursor: form.reminderEnabled ? "pointer" : "not-allowed"
+                  }}
+                >
+                  <option value={1}>1 day</option>
+                  <option value={3}>3 days</option>
+                  <option value={7}>7 days</option>
+                  <option value={14}>14 days</option>
+                </select>
+                <span>before renewal</span>
+              </div>
+            </div>
+            <button
+              onClick={() => f("reminderEnabled")(!form.reminderEnabled)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: form.reminderEnabled ? t.blue : t.text3,
+              }}
+            >
+              {form.reminderEnabled ? (
                 <ToggleRight size={27} />
               ) : (
                 <ToggleLeft size={27} />
@@ -4524,6 +4697,8 @@ export default function Dashboard() {
       currency: s.currency || "USD",
       provider: s.provider || "",
       notes: s.notes || "",
+      reminderEnabled: s.reminderEnabled || false,
+      reminderDaysBefore: s.reminderDaysBefore || 3,
     }));
 
     setSubs(mappedSubs);

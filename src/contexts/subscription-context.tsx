@@ -122,9 +122,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const supabase = createClient();
+
     const fetchSubscriptions = async () => {
       try {
-        const supabase = createClient();
         const { data, error } = await supabase
           .from("subscriptions")
           .select(
@@ -167,8 +168,84 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
 
     fetchSubscriptions();
 
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('realtime:subscriptions')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newSub = payload.new;
+            setSubscriptions((prev) => {
+              // check if it already exists (optimistic updates can add it first)
+              if (prev.some((s) => s.id === newSub.id)) return prev;
+              
+              const formatted: Subscription = {
+                id: newSub.id,
+                name: newSub.name,
+                provider: newSub.provider,
+                category: newSub.category,
+                icon: newSub.icon,
+                startDate: newSub.start_date,
+                billingCycle: newSub.billing_cycle as any,
+                amount: Number(newSub.amount),
+                currency: newSub.currency as any,
+                notes: newSub.notes || "",
+                activeStatus: newSub.active_status,
+                autoRenew: newSub.auto_renew,
+                reminderEnabled: newSub.reminder_enabled ?? false,
+                reminderDaysBefore: newSub.reminder_days_before ?? 3,
+                nextRenewalDate: newSub.next_renewal_date ?? null,
+                lastReminderSent: newSub.last_reminder_sent ?? null,
+                usageCount: newSub.usage_count,
+                lastUsed: newSub.last_used,
+              };
+              return [formatted, ...prev];
+            });
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedSub = payload.new;
+            setSubscriptions((prev) => prev.map((sub) => {
+              if (sub.id === updatedSub.id) {
+                return {
+                  ...sub,
+                  name: updatedSub.name,
+                  provider: updatedSub.provider,
+                  category: updatedSub.category,
+                  icon: updatedSub.icon,
+                  startDate: updatedSub.start_date,
+                  billingCycle: updatedSub.billing_cycle as any,
+                  amount: Number(updatedSub.amount),
+                  currency: updatedSub.currency as any,
+                  notes: updatedSub.notes || "",
+                  activeStatus: updatedSub.active_status,
+                  autoRenew: updatedSub.auto_renew,
+                  reminderEnabled: updatedSub.reminder_enabled ?? false,
+                  reminderDaysBefore: updatedSub.reminder_days_before ?? 3,
+                  nextRenewalDate: updatedSub.next_renewal_date ?? null,
+                  lastReminderSent: updatedSub.last_reminder_sent ?? null,
+                  usageCount: updatedSub.usage_count,
+                  lastUsed: updatedSub.last_used,
+                };
+              }
+              return sub;
+            }));
+          } else if (payload.eventType === 'DELETE') {
+            const deletedSub = payload.old;
+            setSubscriptions((prev) => prev.filter((sub) => sub.id !== deletedSub.id));
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
+      supabase.removeChannel(channel);
     };
   }, [user]);
 

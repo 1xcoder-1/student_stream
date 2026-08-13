@@ -40,6 +40,8 @@ export interface Sub {
   currency: string;
   provider: string;
   notes: string;
+  reminderEnabled?: boolean;
+  reminderDaysBefore?: number;
 }
 
 import {

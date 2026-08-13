@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { summarizeSpending } from '@/lib/gemini-service'
+import { summarizeSpendingStream } from '@/lib/gemini-service'
 import { NextRequest } from 'next/server'
 
 const rateLimitMap = new Map<string, { count: number; reset: number }>()
@@ -29,9 +29,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const summary = await summarizeSpending(subscriptions)
-    return Response.json({ summary })
-  } catch {
+    const stream = await summarizeSpendingStream(subscriptions)
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+      },
+    })
+  } catch (error) {
+    console.error("AI Streaming Error:", error);
     return Response.json({ error: 'AI service unavailable' }, { status: 500 })
   }
 }

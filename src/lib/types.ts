@@ -32,8 +32,8 @@ import {
   Zap,
 } from "lucide-react";
 
-export const BILLING_CYCLES = ["monthly", "yearly", "one-time"] as const;
-export type BillingCycle = (typeof BILLING_CYCLES)[number];
+export const BILLING_CYCLES = ["Daily", "Weekly", "Monthly", "Quarterly", "Annually", "one-time", "monthly", "yearly"] as const;
+export type BillingCycle = (typeof BILLING_CYCLES)[number] | string;
 
 export const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"] as const;
 export type Currency = (typeof CURRENCIES)[number];

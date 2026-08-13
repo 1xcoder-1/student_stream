@@ -1,26 +1,34 @@
 export function calculateNextRenewalDate(
   startDate: string,
-  billingCycle: 'monthly' | 'yearly' | 'one-time'
+  billingCycle: string
 ): Date | null {
-  if (billingCycle === 'one-time') return null
+  const cycle = billingCycle.toLowerCase();
+  if (cycle === 'one-time' || cycle === 'onetime') return null;
 
-  const start = new Date(startDate)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const start = new Date(startDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  let next = new Date(start)
+  let next = new Date(start);
 
-  if (billingCycle === 'monthly') {
-    while (next <= today) {
-      next.setMonth(next.getMonth() + 1)
-    }
-  } else if (billingCycle === 'yearly') {
-    while (next <= today) {
-      next.setFullYear(next.getFullYear() + 1)
+  while (next <= today) {
+    if (cycle === 'daily') {
+      next.setDate(next.getDate() + 1);
+    } else if (cycle === 'weekly') {
+      next.setDate(next.getDate() + 7);
+    } else if (cycle === 'monthly') {
+      next.setMonth(next.getMonth() + 1);
+    } else if (cycle === 'quarterly') {
+      next.setMonth(next.getMonth() + 3);
+    } else if (cycle === 'yearly' || cycle === 'annually') {
+      next.setFullYear(next.getFullYear() + 1);
+    } else {
+      // Fallback, assume monthly if unknown
+      next.setMonth(next.getMonth() + 1);
     }
   }
 
-  return next
+  return next;
 }
 
 export function getDaysUntilRenewal(renewalDate: Date): number {

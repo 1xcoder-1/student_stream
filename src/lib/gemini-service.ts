@@ -69,3 +69,38 @@ Analyze my subscriptions: ${JSON.stringify(subscriptions)}`;
   const result = await model.generateContent(prompt);
   return result.response.text() || "Unable to generate summary.";
 }
+export async function summarizeSpendingStream(subscriptions: {
+  name: string;
+  amount: number;
+  billingCycle: string;
+  category: string;
+}[]): Promise<ReadableStream> {
+  const genAI = getGemini();
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const prompt = `You are a personal finance assistant specializing in 
+subscription optimization. Analyze the user's subscriptions and 
+give practical, specific advice. Be direct and actionable.
+Format: 3-4 short paragraphs. No bullet points. No markdown headers.
+
+Analyze my subscriptions: ${JSON.stringify(subscriptions)}`;
+
+  const result = await model.generateContentStream(prompt);
+
+  return new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      try {
+        for await (const chunk of result.stream) {
+          const chunkText = chunk.text();
+          if (chunkText) {
+            controller.enqueue(encoder.encode(chunkText));
+          }
+        }
+        controller.close();
+      } catch (error) {
+        controller.error(error);
+      }
+    },
+  });
+}
