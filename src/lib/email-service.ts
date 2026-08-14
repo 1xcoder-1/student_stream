@@ -168,7 +168,7 @@ export async function sendRenewalReminder({
               </div>
               <div>
                 <p style="color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 4px;">Amount</p>
-                <p style="font-size: 16px; font-weight: 600; margin: 0; color: ${accentColor};">${currency} ${amount.toFixed(2)}</p>
+                <p style="font-size: 16px; font-weight: 600; margin: 0; color: ${accentColor};">${currency} ${amount.toFixed(0)}</p>
               </div>
             </div>
           </div>
@@ -176,10 +176,10 @@ export async function sendRenewalReminder({
           <!-- Action Message -->
           <div style="background: ${accentColor}11; border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 1px solid ${accentColor}33;">
             <p style="margin: 0; color: #1a1a1a; font-size: 14px;">
-              ${isUrgent 
-                ? `<strong>⚠️ Action needed:</strong> Your ${subscriptionName} subscription will renew tomorrow. Make sure you have sufficient funds or cancel if you no longer need it.`
-                : `Your ${subscriptionName} subscription will renew on ${renewalDate}. Review your subscription to ensure it's still needed.`
-              }
+              ${isUrgent
+      ? `<strong>⚠️ Action needed:</strong> Your ${subscriptionName} subscription will renew tomorrow. Make sure you have sufficient funds or cancel if you no longer need it.`
+      : `Your ${subscriptionName} subscription will renew on ${renewalDate}. Review your subscription to ensure it's still needed.`
+    }
             </p>
           </div>
 
@@ -201,10 +201,10 @@ export async function sendRenewalReminder({
           </div>
         </div>
 
-        <!-- SubStream Branding -->
+        <!--Student Stream Branding -->
         <div style="text-align: center; padding: 16px;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            <strong>SubStream</strong> • Subscription Tracker
+            <strong>Student Stream</strong> • Expense Tracker
           </p>
         </div>
       </div>
@@ -214,7 +214,7 @@ export async function sendRenewalReminder({
 
   try {
     await transporter.sendMail({
-      from: `"SubStream" <${process.env.SMTP_FROM}>`,
+      from: `"StudentStream" <${process.env.SMTP_FROM}>`,
       to,
       subject,
       html,

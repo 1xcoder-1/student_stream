@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/contexts/auth-context";
-import { useSubscriptions } from "@/contexts/subscription-context";
+import { useSubscriptions } from "@/contexts/expense-context";
+import { getCurrencySymbol, convertCurrency } from "@/lib/currency";
 import {
   Bell,
   Search,
@@ -387,8 +388,8 @@ function EditModal({
   const [error, setError] = useState<string | null>(null);
   const f =
     <K extends keyof Sub>(k: K) =>
-    (v: Sub[K]) =>
-      setForm((p) => ({ ...p, [k]: v }));
+      (v: Sub[K]) =>
+        setForm((p) => ({ ...p, [k]: v }));
 
   const handleSave = async () => {
     setSaving(true);
@@ -396,15 +397,16 @@ function EditModal({
     try {
       const supabase = createClient();
       const { error: dbError } = await supabase
-        .from("subscriptions")
+        .from("expenses")
         .update({
           name: form.name,
           category: form.category,
           amount: form.amount,
-          billing_cycle: form.cycle,
+          frequency: form.cycle,
           provider: form.provider,
           notes: form.notes,
           auto_renew: form.autoRenew,
+          is_shared: form.isShared || false,
           currency: form.currency,
           status: form.status,
           reminder_enabled: form.reminderEnabled,
@@ -474,7 +476,7 @@ function EditModal({
                 letterSpacing: -0.5,
               }}
             >
-              Edit Subscription
+              Edit Expense
             </h2>
             <p
               style={{
@@ -518,10 +520,10 @@ function EditModal({
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <InputRow
-            label="Subscription Name *"
+            label="Expense Name *"
             value={form.name}
             onChange={(v) => f("name")(v)}
-            placeholder="e.g. Netflix"
+            placeholder="e.g. Zong Monthly, FAST Tuition, Hostel Rent"
             t={t}
           />
           <div
@@ -583,10 +585,10 @@ function EditModal({
               </div>
             </div>
             <SelectRow
-              label="Billing Cycle"
+              label="Frequency"
               value={form.cycle}
               onChange={(v) => f("cycle")(v)}
-              options={["Daily", "Weekly", "Monthly", "Quarterly", "Annually"]}
+              options={["Daily", "Weekly", "Monthly", "Quarterly", "Annually", "One-time"]}
               t={t}
             />
           </div>
@@ -598,15 +600,13 @@ function EditModal({
               value={form.category}
               onChange={(v) => f("category")(v)}
               options={[
-                "Streaming",
-                "Productivity",
-                "Cloud",
-                "Design",
-                "Development",
-                "Music",
-                "Finance",
-                "Education",
-                "Lifestyle",
+                "Academics & Fees",
+                "Hostel & Rent",
+                "Food & Mess",
+                "Mobile & Internet",
+                "Transport",
+                "Entertainment & Outings",
+                "Freelance Tools & Learning",
                 "Other",
               ]}
               t={t}
@@ -623,7 +623,7 @@ function EditModal({
             label="Provider"
             value={form.provider}
             onChange={(v) => f("provider")(v)}
-            placeholder="e.g. Netflix Inc."
+            placeholder="e.g. Hostel Management"
             t={t}
           />
           <div>
@@ -658,8 +658,8 @@ function EditModal({
                 transition: "border-color 0.2s",
               }}
               onFocus={(e) =>
-                ((e.target as HTMLTextAreaElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLTextAreaElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLTextAreaElement).style.borderColor = t.border)
@@ -709,6 +709,56 @@ function EditModal({
               }}
             >
               {form.autoRenew ? (
+                <ToggleRight size={28} />
+              ) : (
+                <ToggleLeft size={28} />
+              )}
+            </button>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: t.surface2,
+              border: `1px solid ${t.border}`,
+              borderRadius: 8,
+              padding: "12px 14px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: t.text,
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Is Shared?
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: t.text3,
+                  fontFamily: "var(--font-mono)",
+                  marginTop: 1,
+                }}
+              >
+                Split this expense with roommates/friends
+              </div>
+            </div>
+            <button
+              onClick={() => f("isShared")(!form.isShared)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: form.isShared ? t.green : t.text3,
+              }}
+            >
+              {form.isShared ? (
                 <ToggleRight size={28} />
               ) : (
                 <ToggleLeft size={28} />
@@ -848,7 +898,7 @@ function EditModal({
   );
 }
 
-function buildMonthlyData(subs: Sub[]) {
+function buildMonthlyData(subs: Sub[], displayCurrency: string = "PKR") {
   const now = new Date();
   const months = [
     "Jan",
@@ -868,28 +918,33 @@ function buildMonthlyData(subs: Sub[]) {
     const spend = subs
       .filter((s) => s.status === "active")
       .reduce((acc, s) => {
+        const amt = convertCurrency(s.amount, (s.currency as any) || "USD", (displayCurrency as any) || "PKR");
         if (
           s.cycle === "Monthly" ||
           s.cycle === "Daily" ||
           s.cycle === "Weekly"
         )
-          return acc + s.amount;
-        if (s.cycle === "Annually") return acc + s.amount / 12;
-        if (s.cycle === "Quarterly") return acc + s.amount / 3;
+          return acc + amt;
+        if (s.cycle === "Annually") return acc + amt / 12;
+        if (s.cycle === "Quarterly") return acc + amt / 3;
         return acc;
       }, 0);
     return { month, spend: Math.round(spend * 100) / 100 };
   });
 }
 
-function buildCatData(subs: Sub[]) {
+function buildCatData(subs: Sub[], displayCurrency: string = "PKR") {
   const active = subs.filter((s) => s.status === "active");
-  const total = active.reduce((a, s) => a + s.amount, 0);
+  const total = active.reduce((a, s) => {
+    const amt = convertCurrency(s.amount, (s.currency as any) || "USD", (displayCurrency as any) || "PKR");
+    return a + amt;
+  }, 0);
   if (total === 0) return [];
   const catMap: Record<string, number> = {};
   active.forEach((s) => {
     const cat = s.category || "Other";
-    catMap[cat] = (catMap[cat] || 0) + s.amount;
+    const amt = convertCurrency(s.amount, (s.currency as any) || "USD", (displayCurrency as any) || "PKR");
+    catMap[cat] = (catMap[cat] || 0) + amt;
   });
   const colors = [
     "#22c55e",
@@ -915,15 +970,21 @@ function OverviewView({
   t,
   subs,
   onNav,
+  displayCurrency = "PKR",
 }: {
   t: T;
   subs: Sub[];
   onNav: (id: string) => void;
+  displayCurrency?: string;
 }) {
+  const symbol = getCurrencySymbol(displayCurrency as any);
   const active = subs.filter((s) => s.status !== "inactive");
-  const monthly = active.reduce((a, s) => a + s.amount, 0);
-  const monthlyData = buildMonthlyData(subs);
-  const catData = buildCatData(subs);
+  const monthly = active.reduce((a, s) => {
+    const amt = convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any);
+    return a + amt;
+  }, 0);
+  const monthlyData = buildMonthlyData(subs, displayCurrency);
+  const catData = buildCatData(subs, displayCurrency);
   const dueSoon = subs.filter(
     (s) => s.status === "warning" || s.status === "renewal_passed",
   );
@@ -941,14 +1002,14 @@ function OverviewView({
         <KPI
           t={t}
           label="Monthly Spend"
-          value={`$${monthly.toFixed(2)}`}
-          sub={`${active.length} active subscriptions`}
+          value={`${symbol}${monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+          sub={`${active.length} active expenses`}
           trend="neutral"
           Icon={DollarSign}
         />
         <KPI
           t={t}
-          label="Active Subs"
+          label="Active Expenses"
           value={`${active.length}`}
           sub={`${subs.length} total tracked`}
           Icon={CreditCard}
@@ -956,14 +1017,14 @@ function OverviewView({
         <KPI
           t={t}
           label="Annual Cost"
-          value={`$${(monthly * 12).toFixed(0)}`}
+          value={`${symbol}${(monthly * 12).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
           sub="Projected this year"
           Icon={TrendingUp}
         />
         <KPI
           t={t}
-          label="Avg per Sub"
-          value={`$${active.length ? (monthly / active.length).toFixed(2) : "0.00"}`}
+          label="Avg per Expense"
+          value={`${symbol}${active.length ? (monthly / active.length).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "0"}`}
           sub="Monthly average cost"
           trend="neutral"
           Icon={Zap}
@@ -1009,7 +1070,7 @@ function OverviewView({
                   marginTop: 2,
                 }}
               >
-                Based on your active subscriptions
+                Based on your active Expenses
               </div>
             </div>
             <button
@@ -1058,18 +1119,29 @@ function OverviewView({
                 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `$${v}`}
+                tickFormatter={(v) => `${symbol}${v}`}
               />
               <Tooltip
-                contentStyle={{
-                  background: t.surface2,
-                  border: `1px solid ${t.border2}`,
-                  borderRadius: 8,
-                  fontSize: 12,
-                  fontFamily: "var(--font-mono)",
-                  color: t.text,
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div
+                        style={{
+                          background: t.surface2,
+                          border: `1px solid ${t.border2}`,
+                          borderRadius: 8,
+                          padding: "8px 12px",
+                          fontSize: 12,
+                          fontFamily: "var(--font-mono)",
+                          color: t.text,
+                        }}
+                      >
+                        {label}: {symbol}{Number(payload[0].value).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                      </div>
+                    );
+                  }
+                  return null;
                 }}
-                formatter={(v: number) => [`$${v}`, ""]}
               />
               <Area
                 type="monotone"
@@ -1228,7 +1300,7 @@ function OverviewView({
               fontFamily: "var(--font-display)",
             }}
           >
-            My Subscriptions
+            My Expenses
           </div>
           <button
             onClick={() => onNav("subscriptions")}
@@ -1257,7 +1329,7 @@ function OverviewView({
               fontSize: 13,
             }}
           >
-            No subscriptions yet.{" "}
+            No Expenses yet.{" "}
             <button
               onClick={() => onNav("add")}
               style={{
@@ -1314,12 +1386,12 @@ function OverviewView({
                       transition: "background 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        t.surface2)
+                    ((e.currentTarget as HTMLElement).style.background =
+                      t.surface2)
                     }
                     onMouseLeave={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "transparent")
+                    ((e.currentTarget as HTMLElement).style.background =
+                      "transparent")
                     }
                   >
                     <td
@@ -1352,7 +1424,7 @@ function OverviewView({
                         fontFamily: "var(--font-mono)",
                       }}
                     >
-                      {s.currency} {s.amount.toFixed(2)}
+                      {s.currency} {s.amount.toFixed(0)}
                     </td>
                     <td
                       style={{
@@ -1384,13 +1456,16 @@ function SubsView({
   setSubs,
   onAdd,
   toast,
+  displayCurrency = "PKR",
 }: {
   t: T;
   subs: Sub[];
   setSubs: React.Dispatch<React.SetStateAction<Sub[]>>;
   onAdd: () => void;
   toast: (m: string, tp: "success" | "error" | "info") => void;
+  displayCurrency?: string;
 }) {
+  const symbol = getCurrencySymbol(displayCurrency as any);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [sim, setSim] = useState(false);
@@ -1415,7 +1490,7 @@ function SubsView({
     try {
       const supabase = createClient();
       await supabase
-        .from("subscriptions")
+        .from("expenses")
         .update({ status: newStatus })
         .eq("id", id);
       setSubs((prev) =>
@@ -1431,14 +1506,14 @@ function SubsView({
     try {
       const supabase = createClient();
       const { error } = await supabase
-        .from("subscriptions")
+        .from("expenses")
         .delete()
         .eq("id", id);
       if (error) throw error;
       setSubs((prev) => prev.filter((s) => s.id !== id));
-      toast("Subscription deleted", "info");
+      toast("Expense deleted", "info");
     } catch {
-      toast("Failed to delete subscription", "error");
+      toast("Failed to delete expense", "error");
     } finally {
       setDeleting(null);
     }
@@ -1452,10 +1527,10 @@ function SubsView({
 
   const simMonthly = filtered
     .filter((s) => s.status === "active")
-    .reduce((a, s) => a + s.amount, 0);
+    .reduce((a, s) => a + convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any), 0);
   const simInactive = filtered
     .filter((s) => s.status === "inactive")
-    .reduce((a, s) => a + s.amount, 0);
+    .reduce((a, s) => a + convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any), 0);
 
   return (
     <>
@@ -1487,7 +1562,7 @@ function SubsView({
                 letterSpacing: -0.5,
               }}
             >
-              My Subscriptions
+              My Expenses
             </h2>
             <p
               style={{
@@ -1497,11 +1572,11 @@ function SubsView({
                 marginTop: 3,
               }}
             >
-              {subs.length} tracked · $
+              {subs.length} tracked · {symbol}
               {subs
                 .filter((s) => s.status === "active")
-                .reduce((a, s) => a + s.amount, 0)
-                .toFixed(2)}
+                .reduce((a, s) => a + convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any), 0)
+                .toFixed(0)}
               /mo active
             </p>
           </div>
@@ -1568,7 +1643,7 @@ function SubsView({
                 fontFamily: "var(--font-mono)",
               }}
             >
-              Simulation active toggle subscriptions to preview budget changes.
+              Simulation active toggle Expenses to preview budget changes.
               No real changes are saved.
             </span>
           </div>
@@ -1604,8 +1679,8 @@ function SubsView({
                 transition: "border-color 0.2s",
               }}
               onFocus={(e) =>
-                ((e.target as HTMLInputElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLInputElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLInputElement).style.borderColor = t.border)
@@ -1693,12 +1768,12 @@ function SubsView({
                       transition: "background 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        t.surface2)
+                    ((e.currentTarget as HTMLElement).style.background =
+                      t.surface2)
                     }
                     onMouseLeave={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "transparent")
+                    ((e.currentTarget as HTMLElement).style.background =
+                      "transparent")
                     }
                   >
                     <td style={{ padding: "11px 14px" }}>
@@ -1780,7 +1855,7 @@ function SubsView({
                         fontFamily: "var(--font-mono)",
                       }}
                     >
-                      {s.currency} {s.amount.toFixed(2)}
+                      {s.currency} {s.amount.toFixed(0)}
                     </td>
                     <td
                       style={{
@@ -1898,8 +1973,8 @@ function SubsView({
               }}
             >
               {subs.length === 0
-                ? "No subscriptions yet."
-                : `No subscriptions found${search ? ` for "${search}"` : ""}.`}
+                ? "No Expense yet."
+                : `No Expense found${search ? ` for "${search}"` : ""}.`}
             </div>
           )}
         </div>
@@ -1932,14 +2007,14 @@ function SubsView({
               }}
             >
               {[
-                { label: "Active Monthly", value: `$${simMonthly.toFixed(2)}` },
+                { label: "Active Monthly", value: `${symbol}${simMonthly.toFixed(0)}` },
                 {
                   label: "Inactive Monthly",
-                  value: `$${simInactive.toFixed(2)}`,
+                  value: `${symbol}${simInactive.toFixed(0)}`,
                 },
                 {
                   label: "Annual Savings",
-                  value: `$${(simInactive * 12).toFixed(2)}/yr`,
+                  value: `${symbol}${(simInactive * 12).toFixed(0)}/yr`,
                 },
               ].map((item) => (
                 <div
@@ -1982,11 +2057,23 @@ function SubsView({
   );
 }
 
-function AnalyticsView({ t, subs }: { t: T; subs: Sub[] }) {
-  const monthlyData = buildMonthlyData(subs);
-  const catData = buildCatData(subs);
+function AnalyticsView({
+  t,
+  subs,
+  displayCurrency = "PKR",
+}: {
+  t: T;
+  subs: Sub[];
+  displayCurrency?: string;
+}) {
+  const symbol = getCurrencySymbol(displayCurrency as any);
+  const monthlyData = buildMonthlyData(subs, displayCurrency);
+  const catData = buildCatData(subs, displayCurrency);
   const active = subs.filter((s) => s.status === "active");
-  const monthly = active.reduce((a, s) => a + s.amount, 0);
+  const monthly = active.reduce((a, s) => {
+    const amt = convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any);
+    return a + amt;
+  }, 0);
   const dueSoon = subs.filter(
     (s) => s.status === "warning" || s.status === "renewal_passed",
   ).length;
@@ -2027,18 +2114,18 @@ function AnalyticsView({ t, subs }: { t: T; subs: Sub[] }) {
         {[
           {
             l: "Monthly Total",
-            v: `$${monthly.toFixed(2)}`,
-            n: `${active.length} active subs`,
+            v: `${symbol}${monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+            n: `${active.length} active expenses`,
           },
           {
             l: "Annual Projected",
-            v: `$${(monthly * 12).toFixed(0)}`,
-            n: "Based on current subs",
+            v: `${symbol}${(monthly * 12).toLocaleString("en-US", { maximumFractionDigits: 0 })}`,
+            n: "Based on current expenses",
           },
-          { l: "Due Soon", v: `${dueSoon}`, n: "Renewals approaching" },
+          { l: "Due Soon", v: `${dueSoon}`, n: "Due dates approaching" },
           {
-            l: "Avg per Sub",
-            v: `$${active.length ? (monthly / active.length).toFixed(2) : "0.00"}`,
+            l: "Avg per Expense",
+            v: `${symbol}${active.length ? (monthly / active.length).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "0"}`,
             n: "Monthly average",
           },
         ].map((s) => (
@@ -2115,7 +2202,7 @@ function AnalyticsView({ t, subs }: { t: T; subs: Sub[] }) {
             marginBottom: 20,
           }}
         >
-          Projected monthly cost based on active subscriptions
+          Projected monthly cost based on active Expenses
         </div>
         <ResponsiveContainer width="100%" height={240}>
           <AreaChart data={monthlyData}>
@@ -2144,18 +2231,29 @@ function AnalyticsView({ t, subs }: { t: T; subs: Sub[] }) {
               }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `$${v}`}
+              tickFormatter={(v) => `${symbol}${v}`}
             />
             <Tooltip
-              contentStyle={{
-                background: t.surface2,
-                border: `1px solid ${t.border2}`,
-                borderRadius: 8,
-                fontSize: 12,
-                fontFamily: "var(--font-mono)",
-                color: t.text,
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <div
+                      style={{
+                        background: t.surface2,
+                        border: `1px solid ${t.border2}`,
+                        borderRadius: 8,
+                        padding: "8px 12px",
+                        fontSize: 12,
+                        fontFamily: "var(--font-mono)",
+                        color: t.text,
+                      }}
+                    >
+                      {label}: {symbol}{Number(payload[0].value).toLocaleString("en-US", { maximumFractionDigits: 0 })}
+                    </div>
+                  );
+                }
+                return null;
               }}
-              formatter={(v: number) => [`$${v}`, ""]}
             />
             <Area
               type="monotone"
@@ -2355,14 +2453,15 @@ function AnalyticsView({ t, subs }: { t: T; subs: Sub[] }) {
   );
 }
 
-function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
+function AISummaryView({ t, subs, displayCurrency = "PKR" }: { t: T; subs: Sub[]; displayCurrency?: string }) {
+  const symbol = getCurrencySymbol(displayCurrency as any);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const monthly = subs
     .filter((s) => s.status === "active")
-    .reduce((a, s) => a + s.amount, 0);
+    .reduce((a, s) => a + convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any), 0);
   const dueSoon = subs.filter(
     (s) => s.status === "warning" || s.status === "renewal_passed",
   ).length;
@@ -2389,20 +2488,20 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subscriptions: payload }),
       });
-      
+
       if (!res.ok) {
         let errStr = "Failed to generate summary";
-        try { const d = await res.json(); errStr = d.error || errStr; } catch(e){}
+        try { const d = await res.json(); errStr = d.error || errStr; } catch (e) { }
         throw new Error(errStr);
       }
-      
+
       if (!res.body) throw new Error("No response body");
-      
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder("utf-8");
-      
+
       setLoading(false);
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -2431,7 +2530,7 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "substream-ai-summary.txt";
+    a.download = "StudentStream-ai-summary.txt";
     a.click();
   };
 
@@ -2477,7 +2576,7 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
               marginTop: 3,
             }}
           >
-            AI-powered spending insights via Groq · Llama 3.3 70B
+            AI-powered spending insights
           </p>
         </div>
         <button
@@ -2527,13 +2626,13 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
           {
             Icon: DollarSign,
             label: "Monthly Total",
-            value: `$${monthly.toFixed(2)}`,
+            value: `${symbol}${monthly.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
             col: t.green,
             bg: t.greenDim,
           },
           {
             Icon: CreditCard,
-            label: "Active Subs",
+            label: "Active Expenses",
             value: `${subs.filter((s) => s.status === "active").length}`,
             col: t.blue,
             bg: t.blueDim,
@@ -2541,14 +2640,14 @@ function AISummaryView({ t, subs }: { t: T; subs: Sub[] }) {
           {
             Icon: AlertTriangle,
             label: "Due Soon",
-            value: `${dueSoon} sub${dueSoon !== 1 ? "s" : ""}`,
+            value: `${dueSoon} expense${dueSoon !== 1 ? "s" : ""}`,
             col: dueSoon > 0 ? t.red : t.text3,
             bg: dueSoon > 0 ? t.redDim : t.surface2,
           },
           {
             Icon: Target,
             label: "Annual Projected",
-            value: `$${(monthly * 12).toFixed(0)}`,
+            value: `${symbol}${(monthly * 12).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
             col: t.amber,
             bg: t.amberDim,
           },
@@ -2768,6 +2867,7 @@ function AddView({
   onSuccess: () => void;
   toast: (m: string, tp: "success" | "error" | "info") => void;
 }) {
+  const { addSubscription } = useSubscriptions();
   const blank = {
     name: "",
     category: "",
@@ -2776,7 +2876,8 @@ function AddView({
     startDate: "",
     provider: "",
     autoRenew: true,
-    currency: "USD",
+    isShared: false,
+    currency: "PKR",
     notes: "",
     reminderEnabled: false,
     reminderDaysBefore: 3,
@@ -2830,36 +2931,32 @@ function AddView({
     setLoading(true);
     setError(null);
     try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       const startDate =
         form.startDate || new Date().toISOString().split("T")[0];
-      const { error: dbError } = await supabase.from("subscriptions").insert({
-        user_id: user.id,
+      await addSubscription({
         name: form.name,
         amount: parseFloat(form.amount),
-        billing_cycle: form.cycle,
-        category: form.category || null,
-        provider: form.provider || null,
-        start_date: startDate,
-        currency: form.currency,
-        auto_renew: form.autoRenew,
-        notes: form.notes || null,
-        active_status: true,
+        billingCycle: form.cycle as any,
+        category: form.category || "Other",
+        provider: form.provider || "",
+        startDate: startDate,
+        currency: form.currency as any,
+        autoRenew: form.autoRenew,
+        isShared: form.isShared,
+        notes: form.notes || "",
+        activeStatus: true,
         icon: "default",
-        reminder_enabled: form.reminderEnabled,
-        reminder_days_before: form.reminderDaysBefore,
+        reminderEnabled: form.reminderEnabled,
+        reminderDaysBefore: form.reminderDaysBefore as 1 | 3 | 7 | 14 | undefined,
+        nextRenewalDate: null,
+        lastReminderSent: null,
+        usageCount: 0,
       });
-      if (dbError) throw dbError;
       setForm(blank);
-      toast("Subscription added", "success");
+      toast("Expense added", "success");
       onSuccess();
     } catch (err: any) {
-      setError(err.message || "Failed to add subscription");
+      setError(err.message || "Failed to add expense");
     } finally {
       setLoading(false);
     }
@@ -2886,10 +2983,10 @@ function AddView({
     marginBottom: 5,
   };
   const preview = {
-    name: form.name || "Subscription Name",
+    name: form.name || "Expense Name",
     amount: form.amount
-      ? `${form.currency} ${parseFloat(form.amount).toFixed(2)}`
-      : `${form.currency} 0.00`,
+      ? `${form.currency} ${parseFloat(form.amount).toFixed(0)}`
+      : `${form.currency} 0`,
     cycle: form.cycle,
     category: form.category || "",
     start:
@@ -2930,7 +3027,7 @@ function AddView({
             marginBottom: 5,
           }}
         >
-          Add Subscription
+          Add Expense
         </h2>
         <p
           style={{
@@ -2940,7 +3037,7 @@ function AddView({
             marginBottom: 26,
           }}
         >
-          Track your recurring payments with AI-powered insights
+          Track your student allowance and expenses with AI-powered insights
         </p>
         {error && (
           <div
@@ -2960,16 +3057,16 @@ function AddView({
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div>
-            <label style={lStyle}>Subscription Name *</label>
+            <label style={lStyle}>Expense Name *</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
                 value={form.name}
                 onChange={(e) => f("name")(e.target.value)}
-                placeholder="e.g. Netflix"
+                placeholder="e.g. Zong Monthly, FAST Tuition, Hostel Rent"
                 style={{ ...iStyle, flex: 1 }}
                 onFocus={(e) =>
-                  ((e.target as HTMLInputElement).style.borderColor =
-                    t.greenBorder)
+                ((e.target as HTMLInputElement).style.borderColor =
+                  t.greenBorder)
                 }
                 onBlur={(e) => {
                   ((e.target as HTMLInputElement).style.borderColor = t.border);
@@ -3033,7 +3130,7 @@ function AddView({
                     flexShrink: 0,
                   }}
                 >
-                  {["USD", "EUR", "GBP", "PKR", "CAD", "AUD"].map((c) => (
+                  {["PKR", "USD", "EUR", "GBP", "JPY", "CAD", "AUD"].map((c) => (
                     <option key={c}>{c}</option>
                   ))}
                 </select>
@@ -3046,24 +3143,24 @@ function AddView({
                   placeholder="0.00"
                   style={{ ...iStyle }}
                   onFocus={(e) =>
-                    ((e.target as HTMLInputElement).style.borderColor =
-                      t.greenBorder)
+                  ((e.target as HTMLInputElement).style.borderColor =
+                    t.greenBorder)
                   }
                   onBlur={(e) =>
-                    ((e.target as HTMLInputElement).style.borderColor =
-                      t.border)
+                  ((e.target as HTMLInputElement).style.borderColor =
+                    t.border)
                   }
                 />
               </div>
             </div>
             <div>
-              <label style={lStyle}>Billing Cycle</label>
+              <label style={lStyle}>Frequency</label>
               <select
                 value={form.cycle}
                 onChange={(e) => f("cycle")(e.target.value)}
                 style={{ ...iStyle, cursor: "pointer" }}
               >
-                {["Daily", "Weekly", "Monthly", "Quarterly", "Annually"].map(
+                {["Daily", "Weekly", "Monthly", "Quarterly", "Annually", "One-time"].map(
                   (c) => (
                     <option key={c}>{c}</option>
                   ),
@@ -3083,15 +3180,13 @@ function AddView({
               >
                 <option value="">Select category</option>
                 {[
-                  "Streaming",
-                  "Productivity",
-                  "Cloud",
-                  "Design",
-                  "Development",
-                  "Music",
-                  "Finance",
-                  "Education",
-                  "Lifestyle",
+                  "Academics & Fees",
+                  "Hostel & Rent",
+                  "Food & Mess",
+                  "Mobile & Internet",
+                  "Transport",
+                  "Entertainment & Outings",
+                  "Freelance Tools & Learning",
                   "Other",
                 ].map((c) => (
                   <option key={c}>{c}</option>
@@ -3106,8 +3201,8 @@ function AddView({
                 type="date"
                 style={{ ...iStyle }}
                 onFocus={(e) =>
-                  ((e.target as HTMLInputElement).style.borderColor =
-                    t.greenBorder)
+                ((e.target as HTMLInputElement).style.borderColor =
+                  t.greenBorder)
                 }
                 onBlur={(e) =>
                   ((e.target as HTMLInputElement).style.borderColor = t.border)
@@ -3120,11 +3215,11 @@ function AddView({
             <input
               value={form.provider}
               onChange={(e) => f("provider")(e.target.value)}
-              placeholder="e.g. Netflix Inc."
+              placeholder="e.g. Hostel Management"
               style={{ ...iStyle }}
               onFocus={(e) =>
-                ((e.target as HTMLInputElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLInputElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLInputElement).style.borderColor = t.border)
@@ -3140,8 +3235,8 @@ function AddView({
               placeholder="Optional notes…"
               style={{ ...iStyle, resize: "vertical" }}
               onFocus={(e) =>
-                ((e.target as HTMLTextAreaElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLTextAreaElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLTextAreaElement).style.borderColor = t.border)
@@ -3197,7 +3292,57 @@ function AddView({
               )}
             </button>
           </div>
-          
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: t.surface2,
+              border: `1px solid ${t.border}`,
+              borderRadius: 8,
+              padding: "13px 15px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: t.text,
+                  fontFamily: "var(--font-display)",
+                }}
+              >
+                Is Shared?
+              </div>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: t.text3,
+                  fontFamily: "var(--font-mono)",
+                  marginTop: 1,
+                }}
+              >
+                Split this expense with roommates/friends
+              </div>
+            </div>
+            <button
+              onClick={() => f("isShared")(!form.isShared)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: form.isShared ? t.green : t.text3,
+              }}
+            >
+              {form.isShared ? (
+                <ToggleRight size={27} />
+              ) : (
+                <ToggleLeft size={27} />
+              )}
+            </button>
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -3306,7 +3451,7 @@ function AddView({
               </>
             ) : (
               <>
-                <Plus size={14} /> Add Subscription
+                <Plus size={14} /> Add Expense
               </>
             )}
           </button>
@@ -3475,7 +3620,7 @@ function ExportView({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "substream-subscriptions.json";
+    a.download = "studentstream-expenses.json";
     a.click();
     toast("Exported as JSON", "success");
   };
@@ -3511,14 +3656,62 @@ function ExportView({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "substream-subscriptions.csv";
+    a.download = "studentstream-expenses.csv";
     a.click();
     toast("Exported as CSV", "success");
   };
 
   const exportPDF = () => {
-    window.print();
-    toast("PDF export triggered  check print dialog", "info");
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const printWindow = iframe.contentWindow;
+    if (!printWindow) {
+      toast("Could not generate PDF", "error");
+      return;
+    }
+
+    printWindow.document.write('<html><head><title>StudentStream Expenses Report</title>');
+    printWindow.document.write('<style>');
+    printWindow.document.write('body { font-family: "Inter", sans-serif; padding: 40px; color: #111; }');
+    printWindow.document.write('h1 { font-size: 24px; margin-bottom: 20px; border-bottom: 2px solid #22c55e; padding-bottom: 10px; }');
+    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+    printWindow.document.write('th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }');
+    printWindow.document.write('th { background: #f8f8f8; font-weight: 600; color: #555; }');
+    printWindow.document.write('</style></head><body>');
+
+    printWindow.document.write('<h1>StudentStream Expenses Report</h1>');
+    printWindow.document.write('<table>');
+    printWindow.document.write('<thead><tr><th>Expense</th><th>Category</th><th>Amount</th><th>Billing Cycle</th><th>Status</th></tr></thead>');
+    printWindow.document.write('<tbody>');
+
+    subs.forEach(s => {
+      printWindow.document.write(`<tr>
+        <td><strong>${s.name}</strong>${s.provider ? `<br><span style="color:#777;font-size:12px;">${s.provider}</span>` : ''}</td>
+        <td>${s.category}</td>
+        <td>${s.currency} ${s.amount.toFixed(0)}</td>
+        <td>${s.cycle}</td>
+        <td>${s.status.toUpperCase()}</td>
+      </tr>`);
+    });
+
+    printWindow.document.write('</tbody></table>');
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+
+    // Slight delay to ensure styles are loaded before print dialog opens
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    }, 250);
+
+    toast("PDF report generated", "info");
   };
 
   return (
@@ -3543,7 +3736,7 @@ function ExportView({
             marginTop: 3,
           }}
         >
-          Download your subscription data in multiple formats
+          Download your Expenses data in multiple formats
         </p>
       </div>
       <div
@@ -3570,7 +3763,7 @@ function ExportView({
           },
           {
             title: "PDF Export",
-            desc: "Print-ready document with a clean summary of all your subscriptions.",
+            desc: "Print-ready document with a clean summary of all your Expenses.",
             Icon: Download,
             action: exportPDF,
             shortcut: "Ctrl+P",
@@ -3700,7 +3893,7 @@ function ExportView({
             ["Ctrl + E", "Export JSON"],
             ["Ctrl + S", "Export CSV"],
             ["Ctrl + P", "Export PDF"],
-            ["Ctrl + A", "Add New Subscription"],
+            ["Ctrl + A", "Add New Expense"],
           ].map(([k, v]) => (
             <div
               key={k}
@@ -3740,14 +3933,16 @@ function ExportView({
 function SettingsView({
   t,
   toast,
+  onCurrencyChange,
 }: {
   t: T;
   toast: (m: string, tp: "success" | "error" | "info") => void;
+  onCurrencyChange?: (c: string) => void;
 }) {
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("PKR");
   const [goalPeriod, setGoalPeriod] = useState("Monthly");
   const [goalAmt, setGoalAmt] = useState("");
-  const [goalCur, setGoalCur] = useState("USD");
+  const [goalCur, setGoalCur] = useState("PKR");
   const [catInput, setCatInput] = useState("");
   const [cats, setCats] = useState<string[]>([]);
   const [notifs, setNotifs] = useState({
@@ -3765,7 +3960,7 @@ function SettingsView({
         if (parsed.currency) setCurrency(parsed.currency);
         if (parsed.cats) setCats(parsed.cats);
         if (parsed.notifs) setNotifs(parsed.notifs);
-      } catch {}
+      } catch { }
     }
   }, []);
 
@@ -3783,6 +3978,7 @@ function SettingsView({
       "substream-settings",
       JSON.stringify({ currency, cats, notifs }),
     );
+    if (onCurrencyChange) onCurrencyChange(currency);
     await new Promise((r) => setTimeout(r, 300));
     setSaving(false);
     toast("Settings saved", "success");
@@ -3916,7 +4112,7 @@ function SettingsView({
             marginBottom: 16,
           }}
         >
-          Create your own subscription categories
+          Create your own Expense categories
         </p>
         <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
           <input
@@ -4359,8 +4555,8 @@ function ProfileView({
               placeholder="Enter your full name"
               style={iStyle}
               onFocus={(e) =>
-                ((e.target as HTMLInputElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLInputElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLInputElement).style.borderColor = t.border)
@@ -4377,8 +4573,8 @@ function ProfileView({
               placeholder="https://example.com/avatar.jpg"
               style={iStyle}
               onFocus={(e) =>
-                ((e.target as HTMLInputElement).style.borderColor =
-                  t.greenBorder)
+              ((e.target as HTMLInputElement).style.borderColor =
+                t.greenBorder)
               }
               onBlur={(e) =>
                 ((e.target as HTMLInputElement).style.borderColor = t.border)
@@ -4495,25 +4691,6 @@ function ProfileView({
             {plan === "pro" ? "Active" : "Free"}
           </span>
         </div>
-        {plan === "free" && (
-          <p
-            style={{
-              fontSize: 12,
-              color: t.text3,
-              fontFamily: "var(--font-mono)",
-              marginTop: 10,
-            }}
-          >
-            Upgrade to Pro for unlimited subscriptions, AI summaries, and email
-            reminders.{" "}
-            <a
-              href="/pricing"
-              style={{ color: t.green, textDecoration: "none" }}
-            >
-              View plans
-            </a>
-          </p>
-        )}
       </div>
       <div
         style={{
@@ -4660,6 +4837,7 @@ export default function Dashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileSB, setMobileSB] = useState(false);
   const [subs, setSubs] = useState<Sub[]>([]);
+  const [displayCurrency, setDisplayCurrency] = useState("PKR");
   const [toast, setToast] = useState<{
     msg: string;
     type: "success" | "error" | "info";
@@ -4667,6 +4845,16 @@ export default function Dashboard() {
   const t = themeKey === "dark" ? DARK : LIGHT;
 
   const loading = authLoading || subsLoading;
+
+  useEffect(() => {
+    const stored = localStorage.getItem("substream-settings");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.currency) setDisplayCurrency(parsed.currency);
+      } catch { }
+    }
+  }, []);
 
   useEffect(() => {
     const stored = (localStorage.getItem("substream-theme") || "dark") as TK;
@@ -4830,7 +5018,7 @@ export default function Dashboard() {
     }
     switch (active) {
       case "overview":
-        return <OverviewView t={t} subs={subs} onNav={navTo} />;
+        return <OverviewView t={t} subs={subs} onNav={navTo} displayCurrency={displayCurrency} />;
       case "subscriptions":
         return (
           <SubsView
@@ -4839,12 +5027,13 @@ export default function Dashboard() {
             setSubs={setSubs}
             onAdd={() => navTo("add")}
             toast={showToast}
+            displayCurrency={displayCurrency}
           />
         );
       case "analytics":
-        return <AnalyticsView t={t} subs={subs} />;
+        return <AnalyticsView t={t} subs={subs} displayCurrency={displayCurrency} />;
       case "ai-summary":
-        return <AISummaryView t={t} subs={subs} />;
+        return <AISummaryView t={t} subs={subs} displayCurrency={displayCurrency} />;
       case "add":
         return (
           <AddView
@@ -4858,11 +5047,11 @@ export default function Dashboard() {
       case "export":
         return <ExportView t={t} subs={subs} toast={showToast} />;
       case "settings":
-        return <SettingsView t={t} toast={showToast} />;
+        return <SettingsView t={t} toast={showToast} onCurrencyChange={setDisplayCurrency} />;
       case "profile":
         return <ProfileView t={t} toast={showToast} />;
       default:
-        return <OverviewView t={t} subs={subs} onNav={navTo} />;
+        return <OverviewView t={t} subs={subs} onNav={navTo} displayCurrency={displayCurrency} />;
     }
   };
 
@@ -4939,7 +5128,7 @@ export default function Dashboard() {
         >
           <img
             src="/icon.svg"
-            alt="SubStream"
+            alt="StudentStream"
             width={28}
             height={28}
             style={{ borderRadius: 6, flexShrink: 0, display: "block" }}
@@ -4955,7 +5144,7 @@ export default function Dashboard() {
                 whiteSpace: "nowrap",
               }}
             >
-              SubStream
+              Student Stream
             </span>
           )}
         </div>
@@ -5123,11 +5312,11 @@ export default function Dashboard() {
                   marginTop: 1,
                 }}
               >
-                {subs.length} subscriptions · $
+                {subs.length} Expenses · {getCurrencySymbol(displayCurrency as any)}
                 {subs
                   .filter((s) => s.status === "active")
-                  .reduce((a, s) => a + s.amount, 0)
-                  .toFixed(2)}
+                  .reduce((a, s) => a + convertCurrency(s.amount, (s.currency as any) || "USD", displayCurrency as any), 0)
+                  .toFixed(0)}
                 /mo
               </div>
             </div>

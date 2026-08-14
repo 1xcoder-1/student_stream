@@ -1,6 +1,7 @@
 import { Currency, CurrencyRate } from './types';
 
 const EXCHANGE_RATES: CurrencyRate = {
+  PKR: 278,
   USD: 1,
   EUR: 0.85,
   GBP: 0.73,
@@ -29,11 +30,14 @@ export const formatCurrencyWithConversion = (
   return convertedAmount.toLocaleString("en-US", {
     style: "currency",
     currency: displayCurrency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 };
 
 export const getCurrencySymbol = (currency: Currency): string => {
   const symbols: Record<Currency, string> = {
+    PKR: 'Rs ',
     USD: '$',
     EUR: '€',
     GBP: '£',

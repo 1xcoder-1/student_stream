@@ -9,20 +9,20 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://substream-tracker.vercel.app"),
+  metadataBase: new URL("https://studentstream.vercel.app"),
   title: {
-    default: "SubStream - Subscription Tracker",
-    template: "%s | SubStream",
+    default: "StudentStream - Student Budget & Expense Coach",
+    template: "%s | StudentStream",
   },
   description:
-    "Track and manage your subscriptions effortlessly with AI powered insights. 100% free, private, and secure. No signup required.",
+    "Track and manage your student allowance and expenses effortlessly with Gemini AI powered insights. Designed for Pakistani university and hostel students.",
   keywords: [
-    "subscription tracker",
-    "manage subscriptions",
-    "recurring payments",
-    "budgeting tool",
-    "AI insights",
-    "privacy-first",
+    "student budget",
+    "student expense tracker",
+    "hostel rent tracker",
+    "allowance budget",
+    "AI expense coach",
+    "Pakistan students",
     "free",
   ],
   authors: [{ name: "Muhammad Tanveer Abbas" }],
@@ -30,17 +30,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://substream-tracker.vercel.app",
-    title: "SubStream - Privacy-First Subscription Tracker",
+    url: "https://studentstream.vercel.app",
+    title: "StudentStream - AI Powered Student Budget Ledger",
     description:
-      "Track subscriptions with AI powered insights. 100% free and private.",
-    siteName: "SubStream",
+      "Track student expenses with AI powered insights. 100% free, secure, and private.",
+    siteName: "StudentStream",
   },
   twitter: {
     card: "summary_large_image",
-    title: "SubStream - Privacy-First Subscription Tracker",
+    title: "StudentStream - AI Powered Student Budget Ledger",
     description:
-      "Track subscriptions with AI powered insights. 100% free and private.",
+      "Track student expenses with AI powered insights. 100% free, secure, and private.",
     creator: "@m_tanveerabbas",
   },
   robots: {

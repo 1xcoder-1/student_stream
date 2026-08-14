@@ -16,7 +16,7 @@ const downloadFile = (blob: Blob, filename: string) => {
 export const exportToJSON = (subscriptions: Subscription[]) => {
   const jsonString = JSON.stringify(subscriptions, null, 2);
   const blob = new Blob([jsonString], { type: "application/json" });
-  downloadFile(blob, "subscriptions.json");
+  downloadFile(blob, "expenses.json");
 };
 
 export const exportToCSV = (subscriptions: Subscription[]) => {
@@ -42,18 +42,18 @@ export const exportToCSV = (subscriptions: Subscription[]) => {
 
   const csvString = csvRows.join("\n");
   const blob = new Blob([csvString], { type: "text/csv" });
-  downloadFile(blob, "subscriptions.csv");
+  downloadFile(blob, "expenses.csv");
 };
 
 export const exportToPDF = async (subscriptions: Subscription[]) => {
   const doc = new jsPDF();
   
   doc.setFontSize(22);
-  doc.text("SubStream - Subscription Report", 20, 20);
+  doc.text("StudentStream - Student Budget Report", 20, 20);
   
   doc.setFontSize(12);
   doc.text(`Report generated on: ${new Date().toLocaleDateString()}`, 20, 30);
-  doc.text(`Total Subscriptions: ${subscriptions.length}`, 20, 36);
+  doc.text(`Total Expenses: ${subscriptions.length}`, 20, 36);
 
   // Use a temporary element for rendering the table to canvas
   const container = document.createElement('div');
@@ -75,7 +75,7 @@ export const exportToPDF = async (subscriptions: Subscription[]) => {
           <th>Name</th>
           <th>Category</th>
           <th>Amount</th>
-          <th>Cycle</th>
+          <th>Frequency</th>
           <th>Start Date</th>
         </tr>
       </thead>
@@ -84,7 +84,7 @@ export const exportToPDF = async (subscriptions: Subscription[]) => {
           <tr>
             <td>${sub.name}</td>
             <td>${sub.category}</td>
-            <td>${sub.amount.toFixed(2)} ${sub.currency}</td>
+            <td>${sub.amount.toFixed(0)} ${sub.currency}</td>
             <td>${sub.billingCycle}</td>
             <td>${new Date(sub.startDate).toLocaleDateString()}</td>
           </tr>
@@ -118,7 +118,7 @@ export const exportToPDF = async (subscriptions: Subscription[]) => {
       heightLeft -= pageHeight;
     }
 
-    doc.save("subscription-report.pdf");
+    doc.save("expense-report.pdf");
 
   } catch (error) {
     console.error("Failed to generate PDF:", error);

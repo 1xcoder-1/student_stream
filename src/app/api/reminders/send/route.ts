@@ -29,16 +29,10 @@ export async function GET(req: NextRequest) {
   try {
     // Find all subscriptions where reminder should fire today
     const { data: subscriptions, error: fetchError } = await supabase
-      .from('subscriptions')
-      .select(
-        `
-        *,
-        profiles!inner(subscription_tier:plan)
-      `
-      )
+      .from('expenses')
+      .select('*')
       .eq('reminder_enabled', true)
-      .eq('profiles.plan', 'pro')
-      .not('next_renewal_date', 'is', null)
+      .not('due_date', 'is', null)
 
     if (fetchError) {
       console.error('[Reminders] Database fetch error:', fetchError)
@@ -49,7 +43,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      console.log('[Reminders] No subscriptions to process')
+      console.log('[Reminders] No expenses to process')
       return Response.json({ sent: 0, checked: 0, message: 'No reminders to send' })
     }
 
@@ -71,7 +65,7 @@ export async function GET(req: NextRequest) {
 
       const userEmail = userData.user.email
 
-      const renewalDate = new Date(sub.next_renewal_date)
+      const renewalDate = new Date(sub.due_date)
       const daysUntil = Math.ceil(
         (renewalDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
       )
@@ -103,7 +97,7 @@ export async function GET(req: NextRequest) {
           })
 
           const { error: updateError } = await supabase
-            .from('subscriptions')
+            .from('expenses')
             .update({ last_reminder_sent: new Date().toISOString() })
             .eq('id', sub.id)
 

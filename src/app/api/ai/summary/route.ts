@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   const { subscriptions } = await req.json()
   if (!Array.isArray(subscriptions) || subscriptions.length > 50) {
-    return Response.json({ error: 'Invalid subscriptions' }, { status: 400 })
+    return Response.json({ error: 'Invalid Expenses' }, { status: 400 })
   }
 
   try {

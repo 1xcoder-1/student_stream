@@ -68,12 +68,12 @@ export default function SignUpPage() {
           <div className="flex items-center justify-center gap-2 mb-1 sm:mb-2">
             <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight font-headline">
-              SubStream
+              StudentStream
             </h1>
           </div>
           <CardTitle className="text-base sm:text-lg">Create your account</CardTitle>
           <CardDescription className="text-xs">
-            Start tracking your subscriptions with AI powered insights
+            Start tracking your expenses with AI powered insights
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 sm:px-5 pb-5">

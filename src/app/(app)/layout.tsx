@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ReactNode } from "react";
-import { SubscriptionProvider } from "@/contexts/subscription-context";
+import { ExpenseProvider } from "@/contexts/expense-context";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient();
@@ -13,5 +13,5 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     redirect("/sign-in");
   }
 
-  return <SubscriptionProvider>{children}</SubscriptionProvider>;
+  return <ExpenseProvider>{children}</ExpenseProvider>;
 }

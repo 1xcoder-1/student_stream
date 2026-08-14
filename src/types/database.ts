@@ -17,7 +17,7 @@ export interface Profile {
   updated_at: string;
 }
 
-export interface Subscription {
+export interface Expense {
   id: string;
   user_id: string;
   name: string;
@@ -29,12 +29,14 @@ export interface Subscription {
   next_renewal_date: string | null;
   status: SubStatus;
   auto_renew: boolean;
+  is_shared: boolean;
   currency: string;
   notes: string | null;
   icon_url: string | null;
   created_at: string;
   updated_at: string;
 }
+export type Subscription = Expense;
 
 export interface Category {
   id: string;

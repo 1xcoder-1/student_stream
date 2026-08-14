@@ -1,12 +1,12 @@
 {
-  "name": "substream",
+  "name": "StudentStream",
   "version": "3.0.0",
   "description": "Modern subscription tracking app with AI-powered insights",
-  "author": "Muhammad Tanveer Abbas <https://themvpguy.vercel.app/>",
+  "author": "1xcoder <https://1xcoder.vercel.app/>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MuhammadTanveerAbbas/SubStream-Tracker"
+    "url": "https://github.com/1xcoder/SubStream-Tracker"
   },
   "homepage": "https://substream-tracker.vercel.app",
   "private": true,

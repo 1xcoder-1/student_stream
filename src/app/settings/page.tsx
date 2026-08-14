@@ -86,7 +86,7 @@ function SettingsContent() {
           <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           <Target className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           <h1 className="text-lg sm:text-2xl font-semibold tracking-tight font-headline">
-            SubStream
+            StudentStream
           </h1>
         </Link>
       </header>
@@ -237,7 +237,7 @@ function SettingsContent() {
               <div className="flex items-center justify-between p-3 rounded-lg border">
                 <div className="flex items-center gap-3">
                   <Lock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">Unlimited Subscriptions</span>
+                  <span className="text-sm">Unlimited Expenses</span>
                 </div>
                 <span className="text-xs font-medium flex items-center gap-1 text-green-600">
                   <Check className="w-4 h-4" />

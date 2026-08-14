@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from "react";
-import { ArrowRight, PieChart, Sun, Moon } from "lucide-react";
+import { ArrowRight, ArrowLeft, PieChart, Sun, Moon } from "lucide-react";
 import Link from "next/link";
 
 const DARK = {
@@ -58,12 +58,12 @@ function PageNav({ t, themeKey, toggle }: { t:T; themeKey:TK; toggle:()=>void })
   return (
     <nav className="nav-wrap" style={{ position:"fixed", top:0, left:0, right:0, zIndex:100, display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 48px", height:62, background:scrolled?t.navBg:"transparent", borderBottom:scrolled?`1px solid ${t.border}`:"none", backdropFilter:scrolled?"blur(14px)":"none", WebkitBackdropFilter:scrolled?"blur(14px)":"none", transition:"all 0.35s" }}>
       <Link href="/" style={{ display:"flex", alignItems:"center", gap:9, textDecoration:"none" }}>
-        <img src="/icon.svg" alt="SubStream" width={28} height={28} style={{ borderRadius:7, flexShrink:0, display:"block" }} />
-        <span style={{ fontFamily:"var(--font-display)", fontSize:17, fontWeight:800, color:t.text, letterSpacing:-0.5 }}>SubStream</span>
+        <img src="/icon.svg" alt="Student Stream" width={28} height={28} style={{ borderRadius:7, flexShrink:0, display:"block" }} />
+        <span style={{ fontFamily:"var(--font-display)", fontSize:17, fontWeight:800, color:t.text, letterSpacing:-0.5 }}>Student Stream</span>
       </Link>
 
       <div className="nav-links" style={{ display:"flex", alignItems:"center", gap:24 }}>
-        {[["Home","/"],["Features","/#features"],["Pricing","/pricing"],["Dashboard","/dashboard"]].map(([l,h]) => (
+        {[["Home","/"],["Features","/#features"],["Dashboard","/dashboard"]].map(([l,h]) => (
           <Link key={l} href={h} style={{ fontSize:13, color:t.text2, fontWeight:500, fontFamily:"var(--font-display)", transition:"color 0.2s" }}
             onMouseEnter={e=>(e.currentTarget.style.color=t.text)}
             onMouseLeave={e=>(e.currentTarget.style.color=t.text2)}>{l}</Link>
@@ -89,15 +89,15 @@ function PageFooter({ t }: { t:T }) {
     <footer style={{ borderTop:`1px solid ${t.border}`, padding:"36px 24px" }}>
       <div className="footer-row" style={{ maxWidth:1080, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <img src="/icon.svg" alt="SubStream" width={24} height={24} style={{ borderRadius:5, display:"block" }} />
-          <span style={{ fontFamily:"var(--font-display)", fontSize:15, fontWeight:800, color:t.text }}>SubStream</span>
+          <img src="/icon.svg" alt="Student Stream" width={24} height={24} style={{ borderRadius:5, display:"block" }} />
+          <span style={{ fontFamily:"var(--font-display)", fontSize:15, fontWeight:800, color:t.text }}>Student Stream</span>
         </div>
         <div style={{ display:"flex", gap:20, flexWrap:"wrap", justifyContent:"center" }}>
-          {[["Home","/"],["Pricing","/pricing"],["Privacy","/privacy"],["Terms","/terms"],["GitHub","https://github.com/MuhammadTanveerAbbas/SubStream-Tracker"]].map(([l,h]) => (
+          {[["Home","/"],["Privacy","/privacy"],["Terms","/terms"],["GitHub","https://github.com/MuhammadTanveerAbbas/SubStream-Tracker"]].map(([l,h]) => (
             <a key={l} href={h} target={h.startsWith("http")?"_blank":"_self"} rel={h.startsWith("http")?"noopener":""} style={{ fontSize:12, color:t.text3, fontFamily:"var(--font-mono)", transition:"color 0.2s" }} onMouseEnter={e=>(e.currentTarget.style.color=t.green)} onMouseLeave={e=>(e.currentTarget.style.color=t.text3)}>{l}</a>
           ))}
         </div>
-        <p style={{ fontSize:11, color:t.text3, fontFamily:"var(--font-mono)" }}>© 2025 SubStream · MIT License</p>
+        <p style={{ fontSize:11, color:t.text3, fontFamily:"var(--font-mono)" }}>© 2026 Student Stream · MIT License</p>
       </div>
     </footer>
   );
@@ -116,35 +116,35 @@ function PrivacyPage() {
   const sections = [
     {
       title: "Information We Collect",
-      body:  "SubStream collects the minimum information necessary to provide the service. This includes your email address for account creation, subscription data you manually enter (service names, amounts, billing cycles), and usage metadata such as feature interactions  never content. We do not collect financial account credentials, bank data, or payment card information.",
+      body:  "Student Stream collects the minimum information necessary to provide the service. This includes your email address for account creation, student expense data you manually enter (item names, amounts, categories, frequencies, roommates details), and usage metadata such as feature interactions. We do not collect bank accounts, credit card passwords, or financial logins.",
     },
     {
       title: "How We Use Your Information",
-      body:  "Your data is used solely to: (1) provide and improve the SubStream service, (2) send renewal alerts and account notifications you have opted into, and (3) generate AI-powered spending insights using your subscription data. We never sell, rent, or share your personal data with third parties for marketing purposes.",
+      body:  "Your data is used solely to: (1) provide and improve the Student Stream service, (2) send due date alerts and notifications you have opted into, and (3) generate Gemini AI-powered budget coaching summaries using your expense data. We never sell, rent, or share your personal data with third parties.",
     },
     {
       title: "Data Storage & Security",
-      body:  "All subscription data is stored in your own Supabase PostgreSQL database. SubStream uses Supabase's Row Level Security (RLS) to ensure users can only access their own data. Data is encrypted in transit (TLS 1.3) and at rest (AES-256). If you self-host, you have complete control over your own data infrastructure.",
+      body:  "All expense data is stored in your secure Supabase PostgreSQL database. Student Stream uses Row Level Security (RLS) to ensure users can only access their own data. Data is encrypted in transit (TLS 1.3) and at rest (AES-256) using Supabase's secure cloud infrastructure.",
     },
     {
-      title: "AI Features (Groq)",
-      body:  "When you use AI auto-fill, your subscription name is sent to Groq's API to generate metadata suggestions. SubStream does not store these API requests beyond the immediate session. Groq's privacy policy governs how they handle API inputs. You can use SubStream without providing a Groq API key  AI features are entirely optional.",
+      title: "AI Features (Gemini)",
+      body:  "When you use AI auto-fill or AI Budget Coach summaries, your expense details are processed using Google Gemini. Student Stream does not store these API requests beyond the immediate session. Gemini AI features are entirely optional and secure.",
     },
     {
       title: "Cookies & Tracking",
-      body:  "SubStream uses only functional cookies necessary for authentication (Supabase session tokens) and your theme preference (localStorage). We do not use advertising cookies, third-party tracking scripts, Google Analytics, or any behavioral analytics services.",
+      body:  "Student Stream uses only functional cookies necessary for authentication (Supabase session tokens) and your theme preference (localStorage). We do not use advertising cookies, third-party tracking scripts, or behavioral tracking services.",
     },
     {
       title: "Data Retention & Deletion",
-      body:  "Your data is retained until you delete your account. To request data deletion, email us or delete your Supabase project directly. Self-hosted users have complete control and can wipe their database at any time. We do not retain backup copies of your data after account deletion.",
+      body:  "Your data is retained until you delete your account. You can request deletion of your account at any time, which permanently removes all your personal details and expenses. We do not retain backup copies of deleted data.",
     },
     {
       title: "Your Rights",
-      body:  "You have the right to: access all data we hold about you, correct inaccurate information, request deletion of your data, export your data in standard formats (JSON, CSV), and withdraw consent for optional features at any time. Contact us at privacy@substream.io to exercise any of these rights.",
+      body:  "You have the right to access all data we hold about you, correct inaccurate information, request deletion of your data, and export your data in standard formats (JSON, CSV). Contact us at privacy@studentstream.io to exercise any of these rights.",
     },
     {
       title: "Contact",
-      body:  "For privacy questions or requests, contact us at privacy@substream.io or open an issue on our GitHub repository at github.com/MuhammadTanveerAbbas/SubStream-Tracker. We respond to all privacy requests within 30 days.",
+      body:  "For privacy questions or requests, contact us at privacy@studentstream.io or open an issue on our GitHub repository. We respond to all privacy requests within 30 days.",
     },
   ];
 
@@ -155,9 +155,27 @@ function PrivacyPage() {
       <main style={{ paddingTop:62 }}>
         <div className="legal-content" style={{ maxWidth:780, margin:"0 auto", padding:"80px 24px 100px" }}>
           <div style={{ marginBottom:48, animation:"fadeUp 0.6s ease both" }}>
+            <Link
+              href="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                color: t.text2,
+                fontFamily: "var(--font-mono)",
+                marginBottom: 20,
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = t.green)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = t.text2)}
+            >
+              <ArrowLeft size={14} /> Back to Home
+            </Link>
+            <br />
             <Label text="Legal" t={t}/>
             <h1 style={{ fontFamily:"var(--font-display)", fontSize:"clamp(34px,5vw,56px)", fontWeight:800, letterSpacing:-2, color:t.text, marginBottom:14, lineHeight:1.06 }}>Privacy Policy</h1>
-            <p style={{ fontSize:13.5, color:t.text2, fontFamily:"var(--font-mono)", lineHeight:1.75 }}>Last updated: March 24, 2026 · SubStream is built with privacy-first principles. We collect the minimum data necessary, store it in your own database, and never sell it.</p>
+            <p style={{ fontSize:13.5, color:t.text2, fontFamily:"var(--font-mono)", lineHeight:1.75 }}>Last updated: March 24, 2026 · Student Stream is built with privacy-first principles. We collect the minimum data necessary, store it in your own database, and never sell it.</p>
           </div>
           <div style={{ display:"flex", flexDirection:"column" }}>
             {sections.map((s,i) => (

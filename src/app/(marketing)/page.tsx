@@ -162,22 +162,22 @@ function MiniDonut({ t }: { t: Theme }) {
 // ─── Dashboard Preview ────────────────────────────────────────────────────────
 function DashPreview({ t }: { t: Theme }) {
   const rows = [
-    { name: "Netflix", cat: "Streaming", amt: "$15.99", warn: false, due: "3d" },
-    { name: "AWS", cat: "Cloud", amt: "$43.20", warn: true, due: "1d" },
-    { name: "Notion", cat: "Productivity", amt: "$16.00", warn: false, due: "8d" },
-    { name: "Figma", cat: "Design", amt: "$15.00", warn: false, due: "5d" },
+    { name: "FAST University Tuition", cat: "Academics & Fees", amt: "Rs 180,000", warn: false, due: "15d" },
+    { name: "Hostel Room Rent", cat: "Hostel & Rent", amt: "Rs 12,000", warn: true, due: "2d" },
+    { name: "Monthly Mess Meal", cat: "Food & Mess", amt: "Rs 6,500", warn: false, due: "8d" },
+    { name: "Zong Weekly Blockbuster", cat: "Mobile & Internet", amt: "Rs 420", warn: false, due: "1d" },
   ];
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, overflow: "hidden", width: "100%", maxWidth: 840, boxShadow: `0 48px 120px ${t.shadow}, 0 0 0 1px ${t.greenBorder}` }}>
       {/* Chrome bar */}
       <div style={{ background: t.surface2, borderBottom: `1px solid ${t.border}`, padding: "10px 18px", display: "flex", alignItems: "center", gap: 7 }}>
         {["#ff5f57", "#ffbd2e", "#28ca42"].map((c, i) => <span key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: c, display: "block" }} />)}
-        <span style={{ flex: 1, textAlign: "center", fontSize: 9.5, color: t.text3, fontFamily: "var(--font-mono)" }}>substream-tracker.vercel.app  Dashboard</span>
+        <span style={{ flex: 1, textAlign: "center", fontSize: 9.5, color: t.text3, fontFamily: "var(--font-mono)" }}>studentstream.vercel.app  Dashboard</span>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, animation: "pulse 2s ease-in-out infinite" }} />
       </div>
       {/* KPI row */}
       <div style={{ padding: "14px 18px", borderBottom: `1px solid ${t.border}`, display: "flex", gap: 24, flexWrap: "wrap" }}>
-        {[{ l: "Monthly Spend", v: "$388.18", I: CreditCard }, { l: "Active Subs", v: "14", I: Zap }, { l: "Annual Total", v: "$4,658", I: TrendingUp }, { l: "Due Soon", v: "AWS · 1d", I: Bell }].map(({ l, v, I }, i) => (
+        {[{ l: "Monthly Commitments", v: "Rs 18,920", I: CreditCard }, { l: "Active Expenses", v: "8", I: Zap }, { l: "Annual Projection", v: "Rs 227,040", I: TrendingUp }, { l: "Due Soon", v: "Hostel · 2d", I: Bell }].map(({ l, v, I }, i) => (
           <div key={i} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <I size={9} color={t.green} />
@@ -247,7 +247,7 @@ function CCell({ v }: { v: CV }) {
   return <span style={{ fontSize: 10.5, fontFamily: "var(--font-mono)", color: "#f59e0b" }}>{v}</span>;
 }
 function CompareTable({ t }: { t: Theme }) {
-  const cols = [{ l: "SubStream", hi: true }, { l: "Spreadsheet", hi: false }, { l: "Truebill", hi: false }, { l: "Rocket Money", hi: false }, { l: "Generic Apps", hi: false }];
+  const cols = [{ l: "StudentStream", hi: true }, { l: "Spreadsheet", hi: false }, { l: "Truebill", hi: false }, { l: "Diary Ledger", hi: false }, { l: "Generic Apps", hi: false }];
   return (
     <div style={{ overflowX: "auto", borderRadius: 14, border: `1px solid ${t.border}`, boxShadow: `0 20px 60px ${t.shadow}` }}>
       <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 580 }}>
@@ -473,7 +473,7 @@ export default function LandingPage() {
       <nav style={{ position: "fixed", top: 12, left: 24, right: 24, borderRadius: 16, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 40px", height: 72, background: scrolled ? t.navBg : "transparent", border: scrolled ? `1px solid ${t.border}` : "1px solid transparent", backdropFilter: scrolled ? "blur(20px)" : "none", transition: "all 0.4s ease" }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <LogoIcon t={t} size={28} />
-          <span style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: t.text, letterSpacing: -0.5 }}>SubStream</span>
+          <span style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 700, color: t.text, letterSpacing: -0.5 }}>Student Stream</span>
         </Link>
         <div className="nav-desktop" style={{ display: "flex", alignItems: "center", gap: 32 }}>
           {["Pricing", "Features", "About Us", "FAQ"].map(l => (
@@ -498,15 +498,15 @@ export default function LandingPage() {
         <div style={{ position: "absolute", top: "-20%", left: "50%", transform: "translateX(-50%)", width: "140vw", height: "1000px", background: `radial-gradient(ellipse at top, ${t.greenBorder} 0%, transparent 60%)`, pointerEvents: "none", zIndex: 0 }} />
 
         <div className="hero-element" style={{ opacity: 0, position: "relative", zIndex: 1, border: `1px solid ${t.border}`, borderRadius: 999, padding: "8px 24px", marginBottom: 48, fontSize: 13, color: t.text2, background: "transparent", display: "flex", alignItems: "center", gap: 8 }}>
-          Launch Week Day 5: <Link href="/" style={{ color: t.green, textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>Self-host SubStream <ArrowRight size={14} /></Link>
+          Hackathon Release: <Link href="/" style={{ color: t.green, textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>Welcome to Student Stream <ArrowRight size={14} /></Link>
         </div>
 
         <h1 className="hero-h1 hero-element" style={{ opacity: 0, position: "relative", zIndex: 1, fontFamily: "var(--font-mono)", fontSize: "clamp(26px,4.5vw,56px)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-0.02em", color: t.text, width: "100%", maxWidth: 1200 }}>
-          Stop wasting time on <br />scattered subscriptions.
+          Take control of student budget <br />under high inflation.
         </h1>
 
         <p className="hero-element" style={{ opacity: 0, position: "relative", zIndex: 1, marginTop: 40, fontSize: "clamp(14px,1.6vw,18px)", color: t.text2, maxWidth: 840, lineHeight: 2, fontFamily: "var(--font-mono)" }}>
-          SubStream is the ultimate open-source alternative to modern subscription tracking. Lightweight, incredibly powerful, and operates in real-time.
+          StudentStream is the ultimate AI-powered expense ledger and budget coach designed specifically for Pakistani university and hostel students.
         </p>
 
         <div className="hero-element" style={{ opacity: 0, position: "relative", zIndex: 1, display: "flex", gap: 20, marginTop: 56, flexWrap: "wrap", justifyContent: "center" }}>
@@ -524,20 +524,20 @@ export default function LandingPage() {
               <Zap size={14} /> FEATURES
             </span>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(32px,4vw,48px)", fontWeight: 800, letterSpacing: -1.5, color: t.text, marginTop: 12, lineHeight: 1.1 }}>
-              Built for teams who <br /><span style={{ color: t.text2, fontStyle: "italic" }}>mean business</span>
+              Designed for students who <br /><span style={{ color: t.text2, fontStyle: "italic" }}>want to save smart</span>
             </h2>
             <p style={{ fontSize: 15, color: t.text3, marginTop: 16, maxWidth: 500, lineHeight: 1.6 }}>
-              SubStream features everything you expect from a premium tool, but it's completely open source and under your control.
+              StudentStream organizes all your hostel and campus commitments, gives AI budget advice, and helps split flat rent with roommates.
             </p>
           </div>
           <div className="feat-grid-2">
             {[
-              { Icon: Sparkles, title: "AI Assistant", desc: "Instantly extract pricing, billing cycles, and categories using state of the art AI models." },
-              { Icon: Search, title: "Deep Search", desc: "Find any subscription in milliseconds with our fuzzy search and intelligent categorization." },
-              { Icon: RefreshCw, title: "Real-Time Sync", desc: "Your dashboard stays up to date instantly across all your devices and browser tabs." },
-              { Icon: Target, title: "Knowledge Graph", desc: "Visualize how your spending connects across different categories and tools." },
-              { Icon: Command, title: "Slash Commands", desc: "Press '/' to instantly open the command palette and navigate anywhere in the app." },
-              { Icon: Shield, title: "Full Privacy", desc: "Self-hostable and completely private. Your data never leaves your Supabase instance." },
+              { Icon: Sparkles, title: "AI Expense Coach", desc: "Instantly categorize fees, rent, data bundles, and get local Pakistani saving tips from Gemini AI." },
+              { Icon: Search, title: "Optimistic UI Updates", desc: "Add expenses and check budgets instantly with real-time sync and zero screen reload lag." },
+              { Icon: RefreshCw, title: "PKR Default Currency", desc: "Track expenses in Pakistani Rupees, with conversion for freelance students earning in USD." },
+              { Icon: Target, title: "Pocket Money Goals", desc: "Set monthly allowance targets and track warnings when fixed commitments threaten your budget." },
+              { Icon: Command, title: "Shared Bill Splitting", desc: "Toggle shared flags for roommates and friends to split flat rents, maids, and mess bills." },
+              { Icon: Shield, title: "100% Secure Auth", desc: "Protect your personal records. Uses secure Supabase auth so your data remains strictly yours." },
             ].map((f, i) => (
               <div key={i} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 16, padding: "32px", display: "flex", flexDirection: "column", gap: 16, transition: "transform 0.2s, border-color 0.2s" }} className="hover-lift">
                 <div style={{ width: 40, height: 40, borderRadius: 8, background: t.surface2, border: `1px solid ${t.border2}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -561,12 +561,12 @@ export default function LandingPage() {
               DASHBOARD
             </span>
             <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(36px,4.5vw,56px)", fontWeight: 800, letterSpacing: -1.5, color: t.text, marginTop: 16, lineHeight: 1.05 }}>
-              Designed for extreme <br /><span style={{ color: t.green, fontStyle: "italic" }}>productivity</span>
+              Engineered for absolute <br /><span style={{ color: t.green, fontStyle: "italic" }}>clarity</span>
             </h2>
             <div style={{ marginTop: 48, display: "flex", flexDirection: "column", gap: 24 }}>
-              <h3 style={{ fontSize: 24, fontWeight: 700, color: t.text, fontFamily: "var(--font-display)", letterSpacing: -0.5 }}>Move at the speed of <br /><span style={{ color: t.green }}>thought.</span></h3>
+              <h3 style={{ fontSize: 24, fontWeight: 700, color: t.text, fontFamily: "var(--font-display)", letterSpacing: -0.5 }}>Manage allowance at the speed of <br /><span style={{ color: t.green }}>thought.</span></h3>
               <p style={{ fontSize: 15, color: t.text2, lineHeight: 1.6 }}>
-                Every action in SubStream is optimized for speed. Use the command palette to search, filter, and manage your subscriptions without leaving your keyboard.
+                Every action in StudentStream is optimized for speed. Use the command palette to search, filter, and manage your campus and hostel expenses without leaving your keyboard.
               </p>
               <div style={{ background: t.surface2, border: `1px solid ${t.border}`, borderRadius: 8, padding: "16px", marginTop: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
@@ -575,11 +575,11 @@ export default function LandingPage() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                   <Search size={16} color={t.text2} />
-                  <span style={{ fontSize: 13, color: t.text, fontFamily: "var(--font-mono)" }}>/ : Search Subscriptions</span>
+                  <span style={{ fontSize: 13, color: t.text, fontFamily: "var(--font-mono)" }}>/ : Search Expenses</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <Target size={16} color={t.text2} />
-                  <span style={{ fontSize: 13, color: t.text, fontFamily: "var(--font-mono)" }}>N : New Subscription</span>
+                  <span style={{ fontSize: 13, color: t.text, fontFamily: "var(--font-mono)" }}>N : New Expense</span>
                 </div>
               </div>
             </div>
@@ -602,12 +602,12 @@ export default function LandingPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 24, height: 650, overflow: "hidden", WebkitMaskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)", maskImage: "linear-gradient(to bottom, transparent, black 10%, black 90%, transparent)" }}>
             {[0, 1, 2].map(col => {
               const items = [
-                { name: "Sarah Jenkins", role: "Frontend Lead, Vercel", text: "SubStream completely changed how our team manages SaaS expenses. The AI autofill saves us hours every month." },
-                { name: "David Chen", role: "CTO, Startup Inc", text: "Finally, a subscription tracker that doesn't feel like a spreadsheet. The dark mode and keyboard shortcuts are a game changer." },
-                { name: "Alex Rivera", role: "Indie Hacker", text: "I love that I can self-host this. Full control over my financial data while still getting a premium UI." },
-                { name: "Emily Wong", role: "Product Manager", text: "The dashboard gives me instant clarity. We realized we were paying for 4 overlapping tools within the first day." },
-                { name: "Michael Scott", role: "Freelance Developer", text: "Exporting to JSON and CSV makes tax season a breeze. The simulation mode is brilliant for budget planning." },
-                { name: "Jessica Taylor", role: "Designer", text: "Aesthetically, it's perfect. Functionally, it's blazing fast. The developers really understood what power users want." },
+                { name: "Ali Raza", role: "NUST Hostelite", text: "StudentStream completely changed how I manage my monthly pocket money. The AI recommendations on mobile packages saved me thousands." },
+                { name: "Zainab Fatima", role: "FAST-NU Student", text: "Finally, an expense tracker that splits rent with flatmates and tracks semester installments. The keyboard shortcuts are a game changer." },
+                { name: "Usman Khan", role: "Freelance Student", text: "I track my Fiverr USD income, convert it to PKR, and manage my hosteling budget all in one beautiful dark dashboard." },
+                { name: "Emily Wong", role: "NED Student", text: "The dashboard gives me instant clarity. We realized we were paying for 4 overlapping tools within the first day." },
+                { name: "Michael Scott", role: "Punjab University", text: "Exporting to JSON and CSV makes tracking hostel accounts a breeze. The simulation mode is brilliant for budget planning." },
+                { name: "Jessica Taylor", role: "Design Student", text: "Aesthetically, it's perfect. Functionally, it's blazing fast. The developers really understood what power users want." },
               ];
               // Offset items for visual variety in columns
               const colItems = [...items.slice(col * 2), ...items.slice(0, col * 2)];
@@ -633,16 +633,15 @@ export default function LandingPage() {
             Good questions.<br /><span style={{ color: t.green, fontStyle: "italic" }}>Straight answers.</span>
           </h2>
           <p style={{ fontSize: 15, color: t.text2, fontFamily: "var(--font-mono)", marginBottom: 64, maxWidth: 580, lineHeight: 1.7 }}>
-            Everything you need to know about SubStream tracking, security, and how to get the most out of your subscriptions.
+            Everything you need to know about StudentStream, allowance budgeting, and optimizing your monthly campus costs.
           </p>
           <div style={{ border: `1px solid ${t.border}`, borderRadius: 16, background: t.bg, overflow: "hidden" }}>
             {[
-              ["Is there a free trial?", "Yes! Since SubStream is MIT-licensed and fully open source, the self-hosted version is completely free forever. The hosted version is free during beta."],
-              ["How secure are my notes?", "Incredibly secure. SubStream runs on your own Supabase PostgreSQL database. We never have direct access to your data. You own it completely."],
-              ["Can I collaborate in real-time?", "SubStream focuses on personal subscription tracking right now. Multi-user collaboration features and real-time syncing are on our roadmap!"],
-              ["Is self-hosting supported?", "Absolutely. Clone the GitHub repo, set up a Supabase project, add your environment variables, and deploy anywhere Next.js runs."],
-              ["Does it support AI integration?", "Yes! We use Groq AI for instant auto-filling. Simply type a service name and the AI automatically extracts pricing, billing cycles, and categories."],
-              ["Who owns my data?", "You do. Period. SubStream doesn't lock you in. You can export your data to JSON, CSV, or PDF at any time with a single click."],
+              ["Is it free for students?", "Yes! StudentStream is fully open-source and free during the hackathon beta. You can sign up with your student email and track unlimited expenses."],
+              ["How does the AI Budget Coach work?", "We use Google's Gemini AI to analyze your inputs. It checks your monthly spending and suggests localized savings in Pakistan, such as switching mobile providers or taking public transit."],
+              ["Can I track shared expenses?", "Yes! You can toggle the 'Shared' setting when adding an expense, making it easy to see which bills are split with roommates."],
+              ["Does it support USD earnings?", "Absolutely. Many Pakistani students freelance. You can add income or expenses in USD, and we will normalize it to PKR automatically for your budget goals."],
+              ["Is my data safe?", "Completely. All data runs on our secure Supabase database. We use Row Level Security so only you can access your personal financial logs."],
             ].map(([q, a], i, arr) => <FAQItem key={q} q={q} a={a} t={t} isLast={i === arr.length - 1} />)}
           </div>
         </div>
@@ -660,20 +659,20 @@ export default function LandingPage() {
                   <Label text="GET STARTED NOW" t={t} />
                 </div>
                 <h2 style={{ fontFamily: "var(--font-mono)", fontSize: "clamp(28px,4.5vw,52px)", fontWeight: 700, letterSpacing: "-0.02em", color: t.text, lineHeight: 1.15 }}>
-                  Stop wondering where <br /><span style={{ color: t.green, fontStyle: "italic" }}>your money went.</span>
+                  Track your <br /><span style={{ color: t.green, fontStyle: "italic" }}>allowance now.</span>
                 </h2>
               </div>
 
               <div style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
                 <Link href="/sign-up" style={{ ...btnPrimary, padding: "18px 28px", borderRadius: 16, fontSize: 15, fontWeight: 700, background: t.green, color: "#000", fontFamily: "var(--font-mono)" }}>Go to Dashboard <ArrowRight size={18} /></Link>
-                <a href="https://substream-tracker.vercel.app/" target="_blank" rel="noopener" style={{ ...btnGhost, padding: "18px 28px", borderRadius: 16, fontSize: 15, fontWeight: 700, background: "transparent", borderColor: t.border2, fontFamily: "var(--font-mono)" }}><ArrowUpRight size={18} /> Live Demo</a>
+                <a href="https://studentstream.vercel.app/" target="_blank" rel="noopener" style={{ ...btnGhost, padding: "18px 28px", borderRadius: 16, fontSize: 15, fontWeight: 700, background: "transparent", borderColor: t.border2, fontFamily: "var(--font-mono)" }}><ArrowUpRight size={18} /> Live Demo</a>
               </div>
 
             </div>
 
             <div style={{ marginTop: 32, maxWidth: 760 }}>
               <p style={{ fontSize: 15, color: t.text2, fontFamily: "var(--font-mono)", lineHeight: 1.6 }}>
-                Join thousands of creators who use SubStream Tracker to structure their finances, build complex budget systems, and orchestrate their financial workflow in real-time.
+                Join thousands of students who use Student Stream to structure their budgets, build complex saving profiles, and optimize their campus financial workflow in real-time.
               </p>
             </div>
 
@@ -686,10 +685,10 @@ export default function LandingPage() {
           <div style={{ maxWidth: 300 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
               <LogoIcon t={t} size={32} />
-              <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: t.text, letterSpacing: -1 }}>substream</span>
+              <span style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: t.text, letterSpacing: -1 }}>Student Stream</span>
             </div>
             <p style={{ fontSize: 13, color: t.text2, fontFamily: "var(--font-mono)", lineHeight: 1.8, marginBottom: 24 }}>
-              The real-time subscription tracking engine for modern engineering teams. Engineered for extreme speed, security, and absolute clarity.
+              The real-time expense tracking engine for Pakistani students. Engineered for extreme speed, security, and absolute clarity.
             </p>
             <div style={{ display: "flex", gap: 12 }}>
               <div style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${t.border}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent" }}><Zap size={16} color={t.text2} /></div>
@@ -718,9 +717,9 @@ export default function LandingPage() {
 
         <div style={{ maxWidth: 1100, margin: "80px auto 0", paddingTop: 32, borderTop: `1px solid ${t.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24, fontSize: 10, color: t.text3, fontFamily: "var(--font-mono)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
           <div style={{ display: "flex", gap: 24 }}>
-            <span>© 2026 SUBSTREAM</span>
+            <span>© 2026 STUDENTSTREAM</span>
             <span style={{ color: t.border }}>|</span>
-            <span>BUILT BY 1XCODER</span>
+            <span>BUILT BY 1xcoder</span>
           </div>
           <div style={{ display: "flex", gap: 32 }}>
             {["GITHUB", "LIVE APP", "PRIVACY", "TERMS"].map(l => (

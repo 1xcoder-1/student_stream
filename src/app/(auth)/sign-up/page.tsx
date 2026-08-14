@@ -161,7 +161,7 @@ function AuthShell({ t, children }: { t: T; children: React.ReactNode }) {
       >
         <img
           src="/icon.svg"
-          alt="SubStream"
+          alt="StudentStream"
           width={32}
           height={32}
           style={{ borderRadius: 8, display: "block" }}
@@ -175,7 +175,7 @@ function AuthShell({ t, children }: { t: T; children: React.ReactNode }) {
             letterSpacing: -0.5,
           }}
         >
-          SubStream
+          Student Stream
         </span>
       </Link>
       <div
@@ -198,7 +198,7 @@ function AuthShell({ t, children }: { t: T; children: React.ReactNode }) {
           zIndex: 1,
         }}
       >
-        © 2025 SubStream ·{" "}
+        © 2026 StudentStream ·{" "}
         <Link
           href="/privacy"
           style={{ color: t.text3, transition: "color 0.2s" }}
@@ -672,7 +672,7 @@ export default function SignUpPage() {
             marginBottom: 28,
           }}
         >
-          Start tracking your subscriptions for free
+          Track your expenses for free
         </p>
         {globalErr && <ErrBanner msg={globalErr} t={t} />}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

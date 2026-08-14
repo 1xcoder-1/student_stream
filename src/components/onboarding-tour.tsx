@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/card";
 import { X, ArrowRight, Sparkles, BarChart3, Download } from "lucide-react";
 
-const ONBOARDING_KEY = "substream_onboarding_completed";
+const ONBOARDING_KEY = "StudentStream_onboarding_completed";
 
 const steps = [
   {
-    title: "Welcome to SubStream! 🎯",
+    title: "Welcome to StudentStream! 🎯",
     description:
-      "Track all your subscriptions in one place. Your data is securely stored in Supabase and synced across devices.",
+      "Track all your expenses in one place. Your data is securely stored in Supabase and synced across devices.",
     icon: Sparkles,
   },
   {
@@ -36,7 +36,7 @@ const steps = [
   {
     title: "Export & Import",
     description:
-      "Export your data to JSON, CSV, or PDF. Import existing subscriptions to get started quickly.",
+      "Export your data to JSON, CSV, or PDF. Import existing Expenses to get started quickly.",
     icon: Download,
   },
 ];
@@ -120,9 +120,8 @@ export function OnboardingTour() {
             {steps.map((_, idx) => (
               <div
                 key={idx}
-                className={`h-1 flex-1 rounded-full transition-colors ${
-                  idx <= currentStep ? "bg-primary" : "bg-muted"
-                }`}
+                className={`h-1 flex-1 rounded-full transition-colors ${idx <= currentStep ? "bg-primary" : "bg-muted"
+                  }`}
               />
             ))}
           </div>

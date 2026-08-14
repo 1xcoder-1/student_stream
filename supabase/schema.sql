@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS ai_summaries CASCADE;
 DROP TABLE IF EXISTS spending_goals CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS processed_webhook_events CASCADE;
-DROP TABLE IF EXISTS subscriptions CASCADE;
+DROP TABLE IF EXISTS expenses CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 
 -- ============================================================
@@ -38,9 +38,9 @@ CREATE TABLE profiles (
 );
 
 -- ============================================================
--- subscriptions
+-- expenses
 -- ============================================================
-CREATE TABLE subscriptions (
+CREATE TABLE expenses (
   id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id             UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   name                TEXT        NOT NULL,
@@ -49,14 +49,15 @@ CREATE TABLE subscriptions (
   icon                TEXT        DEFAULT 'default',
   icon_url            TEXT,
   start_date          DATE,
-  next_renewal_date   DATE,
-  billing_cycle       TEXT        NOT NULL CHECK (billing_cycle IN ('Daily','Weekly','Monthly','Quarterly','Annually','monthly','yearly','one-time')),
+  due_date            DATE,
+  frequency           TEXT        NOT NULL CHECK (frequency IN ('Daily','Weekly','Monthly','Quarterly','Annually','monthly','yearly','one-time','One-time')),
   amount              NUMERIC(10,2) NOT NULL,
-  currency            TEXT        DEFAULT 'USD',
+  currency            TEXT        DEFAULT 'PKR',
   notes               TEXT,
   status              TEXT        DEFAULT 'active' CHECK (status IN ('active','inactive','warning','renewal_passed')),
   active_status       BOOLEAN     DEFAULT true,
   auto_renew          BOOLEAN     DEFAULT true,
+  is_shared           BOOLEAN     DEFAULT false,
   usage_count         INTEGER     DEFAULT 0,
   last_used           TIMESTAMPTZ,
   reminder_enabled    BOOLEAN     DEFAULT false,
@@ -140,7 +141,7 @@ CREATE TABLE processed_webhook_events (
 -- Row Level Security
 -- ============================================================
 ALTER TABLE profiles                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE subscriptions           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE expenses                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE spending_goals          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_summaries            ENABLE ROW LEVEL SECURITY;
@@ -153,11 +154,11 @@ CREATE POLICY "Users can view own profile"   ON profiles FOR SELECT USING (auth.
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
--- subscriptions policies
-CREATE POLICY "Users can view own subscriptions"   ON subscriptions FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own subscriptions" ON subscriptions FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own subscriptions" ON subscriptions FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own subscriptions" ON subscriptions FOR DELETE USING (auth.uid() = user_id);
+-- expenses policies
+CREATE POLICY "Users can view own expenses"   ON expenses FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own expenses" ON expenses FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own expenses" ON expenses FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can delete own expenses" ON expenses FOR DELETE USING (auth.uid() = user_id);
 
 -- categories policy
 CREATE POLICY "Users manage own categories" ON categories FOR ALL USING (auth.uid() = user_id);
@@ -189,8 +190,8 @@ CREATE TRIGGER handle_profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
-CREATE TRIGGER handle_subscriptions_updated_at
-  BEFORE UPDATE ON subscriptions
+CREATE TRIGGER handle_expenses_updated_at
+  BEFORE UPDATE ON expenses
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
 CREATE TRIGGER handle_spending_goals_updated_at
@@ -204,26 +205,24 @@ CREATE TRIGGER handle_notification_settings_updated_at
 -- ============================================================
 -- Indexes
 -- ============================================================
-CREATE INDEX idx_subscriptions_user_id       ON subscriptions(user_id);
-CREATE INDEX idx_subscriptions_status        ON subscriptions(user_id, status);
-CREATE INDEX idx_subscriptions_created_at    ON subscriptions(created_at);
-CREATE INDEX idx_subscriptions_active_status ON subscriptions(active_status);
-CREATE INDEX idx_subscriptions_category      ON subscriptions(category);
-CREATE INDEX idx_subscriptions_renewal_date  ON subscriptions(next_renewal_date);
+CREATE INDEX idx_expenses_user_id       ON expenses(user_id);
+CREATE INDEX idx_expenses_status        ON expenses(user_id, status);
+CREATE INDEX idx_expenses_created_at    ON expenses(created_at);
+CREATE INDEX idx_expenses_active_status ON expenses(active_status);
+CREATE INDEX idx_expenses_category      ON expenses(category);
+CREATE INDEX idx_expenses_due_date      ON expenses(due_date);
 CREATE INDEX idx_ai_summaries_user_expires   ON ai_summaries(user_id, expires_at DESC);
 
 -- ============================================================
 -- Seed: system categories
 -- ============================================================
 INSERT INTO categories (user_id, name, color, is_system) VALUES
-  (NULL, 'Entertainment',           '#ef4444', true),
-  (NULL, 'Productivity & Software', '#3b82f6', true),
-  (NULL, 'Cloud & Infrastructure',  '#f59e0b', true),
-  (NULL, 'Design',                  '#8b5cf6', true),
-  (NULL, 'Development',             '#22c55e', true),
-  (NULL, 'Music',                   '#ec4899', true),
-  (NULL, 'Finance & Business',      '#14b8a6', true),
-  (NULL, 'Lifestyle & Health',      '#f97316', true),
-  (NULL, 'Education',               '#06b6d4', true),
-  (NULL, 'Other',                   '#6b7280', true)
+  (NULL, 'Academics & Fees',         '#ef4444', true),
+  (NULL, 'Hostel & Rent',            '#3b82f6', true),
+  (NULL, 'Food & Mess',              '#f59e0b', true),
+  (NULL, 'Mobile & Internet',        '#8b5cf6', true),
+  (NULL, 'Transport',                '#22c55e', true),
+  (NULL, 'Entertainment & Outings',  '#ec4899', true),
+  (NULL, 'Freelance Tools & Learning','#14b8a6', true),
+  (NULL, 'Other',                    '#6b7280', true)
 ON CONFLICT DO NOTHING;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { SubscriptionProvider, useSubscriptions } from '@/contexts/subscription-context';
+import { SubscriptionProvider, useSubscriptions } from '@/contexts/expense-context';
 import type { Subscription } from '@/lib/types';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -18,8 +18,8 @@ describe('SubscriptionContext', () => {
 
     act(() => {
       result.current.addSubscription({
-        name: 'Netflix',
-        provider: 'Netflix Inc',
+        name: 'Hostel Rent',
+        provider: 'Hostel Management',
         category: 'Entertainment',
         icon: 'streaming',
         startDate: new Date().toISOString(),
@@ -33,7 +33,7 @@ describe('SubscriptionContext', () => {
     });
 
     expect(result.current.subscriptions).toHaveLength(1);
-    expect(result.current.subscriptions[0].name).toBe('Netflix');
+    expect(result.current.subscriptions[0].name).toBe('Hostel Rent');
   });
 
   it('should update subscription', () => {
@@ -41,8 +41,8 @@ describe('SubscriptionContext', () => {
 
     act(() => {
       result.current.addSubscription({
-        name: 'Netflix',
-        provider: 'Netflix Inc',
+        name: 'Hostel Rent',
+        provider: 'Hostel Management',
         category: 'Entertainment',
         icon: 'streaming',
         startDate: new Date().toISOString(),
@@ -69,8 +69,8 @@ describe('SubscriptionContext', () => {
 
     act(() => {
       result.current.addSubscription({
-        name: 'Netflix',
-        provider: 'Netflix Inc',
+        name: 'Hostel Rent',
+        provider: 'Hostel Management',
         category: 'Entertainment',
         icon: 'streaming',
         startDate: new Date().toISOString(),

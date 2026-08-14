@@ -32,13 +32,13 @@ import {
   Zap,
 } from "lucide-react";
 
-export const BILLING_CYCLES = ["Daily", "Weekly", "Monthly", "Quarterly", "Annually", "one-time", "monthly", "yearly"] as const;
+export const BILLING_CYCLES = ["Daily", "Weekly", "Monthly", "Quarterly", "Annually", "one-time", "monthly", "yearly", "One-time"] as const;
 export type BillingCycle = (typeof BILLING_CYCLES)[number] | string;
 
-export const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "CAD", "AUD"] as const;
+export const CURRENCIES = ["PKR", "USD", "EUR", "GBP", "JPY", "CAD", "AUD"] as const;
 export type Currency = (typeof CURRENCIES)[number];
 
-// Kept for backwards compatibility for existing subscriptions
+// Kept for backwards compatibility for existing expenses
 export const CATEGORY_ICONS: Record<string, React.ElementType> = {
   entertainment: Clapperboard,
   music: Music,
@@ -73,42 +73,38 @@ export const CATEGORY_ICONS: Record<string, React.ElementType> = {
 };
 
 export const ICON_CATEGORIES: Record<string, Record<string, React.ElementType>> = {
-  "Entertainment": {
+  "Academics & Fees": {
+    education: GraduationCap,
+    books: BookOpen,
+    finance: Book,
+  },
+  "Hostel & Rent": {
+    home: Home,
+    building: Building,
+  },
+  "Food & Mess": {
+    food: Utensils,
+  },
+  "Mobile & Internet": {
+    internet: Wifi,
+    mobile: Smartphone,
+  },
+  "Transport": {
+    domain: Globe,
+    startup: Rocket,
+  },
+  "Entertainment & Outings": {
     streaming: Tv,
     music: Music,
     gaming: Gamepad2,
     movies: Film,
-    podcast: Podcast,
-    news: Newspaper,
-    books: BookOpen,
-    video: MonitorPlay,
   },
-  "Productivity & Software": {
+  "Freelance Tools & Learning": {
     software: Laptop,
     code: Code,
-    cloud: Cloud,
+    ai: BrainCircuit,
     hosting: Server,
     security: Shield,
-    ai: BrainCircuit,
-  },
-  "Finance & Business": {
-    business: Briefcase,
-    finance: Book,
-    startup: Rocket,
-    company: Building,
-    ecommerce: Store,
-  },
-  "Lifestyle & Health": {
-    health: Heart,
-    fitness: Dumbbell,
-    shopping: ShoppingCart,
-    food: Utensils,
-    education: GraduationCap,
-    home: Home,
-    internet: Wifi,
-    mobile: Smartphone,
-    utilities: Zap,
-    domain: Globe,
   },
   "Other": {
     default: HelpCircle,
@@ -116,26 +112,29 @@ export const ICON_CATEGORIES: Record<string, Record<string, React.ElementType>> 
 };
 
 
-export interface Subscription {
+export interface Expense {
   id: string;
   name: string;
   provider: string;
   category: string;
   icon: keyof typeof CATEGORY_ICONS;
   startDate: string; // ISO string for date
-  billingCycle: BillingCycle;
+  billingCycle: BillingCycle; // maps to frequency
   amount: number;
   currency: Currency;
   notes: string;
   activeStatus: boolean;
   autoRenew: boolean;
+  isShared?: boolean; // student flat splitting
   reminderEnabled?: boolean;
   reminderDaysBefore?: 1 | 3 | 7 | 14;
-  nextRenewalDate?: string | null; // ISO date (YYYY-MM-DD) or null
+  nextRenewalDate?: string | null; // ISO date (YYYY-MM-DD) or null (maps to due_date)
   lastReminderSent?: string | null;
   usageCount?: number;
   lastUsed?: string;
 }
+
+export type Subscription = Expense; // Alias for backward compatibility if needed in some untracked files
 
 export interface SpendingGoal {
   id: string;
@@ -156,4 +155,5 @@ export interface CurrencyRate {
   [key: string]: number;
 }
 
-export type SubscriptionFormData = Omit<Subscription, "id">;
+export type SubscriptionFormData = Omit<Expense, "id">;
+export type ExpenseFormData = Omit<Expense, "id">;
