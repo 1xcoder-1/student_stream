@@ -1,12 +1,12 @@
 {
   "name": "StudentStream",
   "version": "3.0.0",
-  "description": "Modern subscription tracking app with AI-powered insights",
+  "description": "Modern Expense tracking app with AI-powered insights",
   "author": "1xcoder <https://1xcoder.vercel.app/>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/1xcoder/SubStream-Tracker"
+    "url": "https://github.com/1xcoder-1/student_stream"
   },
   "homepage": "https://substream-tracker.vercel.app",
   "private": true,
