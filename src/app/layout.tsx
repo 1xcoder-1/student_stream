@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://studentstream.vercel.app"),
+  metadataBase: new URL("https://student-stream.vercel.app"),
   title: {
     default: "StudentStream - Student Budget & Expense Coach",
     template: "%s | StudentStream",
@@ -25,12 +25,12 @@ export const metadata: Metadata = {
     "Pakistan students",
     "free",
   ],
-  authors: [{ name: "Muhammad Tanveer Abbas" }],
-  creator: "Muhammad Tanveer Abbas",
+  authors: [{ name: "1xcoder" }],
+  creator: "1xcoder",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://studentstream.vercel.app",
+    url: "https://student-stream.vercel.app/",
     title: "StudentStream - AI Powered Student Budget Ledger",
     description:
       "Track student expenses with AI powered insights. 100% free, secure, and private.",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     title: "StudentStream - AI Powered Student Budget Ledger",
     description:
       "Track student expenses with AI powered insights. 100% free, secure, and private.",
-    creator: "@m_tanveerabbas",
+    creator: "1xcoder",
   },
   robots: {
     index: true,
