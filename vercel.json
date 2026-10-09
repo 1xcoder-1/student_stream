@@ -1,3 +1,9 @@
 {
-    "name": "Student-Stream"
+    "name": "Student-Stream",
+    "crons": [
+        {
+            "path": "/api/keep-alive",
+            "schedule": "0 0 * * *"
+        }
+    ]
 }
